@@ -20,15 +20,15 @@ public class Cliente {
 				BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
 		{
-			//String opcion=args[0];
-			//if (opcion=="ADD")
-			//{
-				//out.write("ADD " + "prueba" + "\r\n");
-				//out.flush();
-				//System.out.println(in.readLine());
-			//}
-			//if(opcion=="CLONE ")
-			//{
+			String opcion=args[0];
+			if (opcion=="ADD")
+			{
+				out.write("ADD " + "prueba" + "\r\n");
+				out.flush();
+				System.out.println(in.readLine());
+			}
+			if(opcion=="CLONE ")
+			{
 				out.write("CLONE " + "prueba" + "\r\n");
 				out.flush();
 				FileInputStream f=new FileInputStream("prueba");
@@ -38,7 +38,7 @@ public class Cliente {
 				
 				ois.close();
 				
-			//}
+			}
 		} catch (IOException e)
 		{
 			e.printStackTrace();

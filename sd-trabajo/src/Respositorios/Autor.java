@@ -1,7 +1,12 @@
+
 package Respositorios;
+import java.io.Serializable;
+public class Autor implements Serializable {
 
-public class Autor {
-
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String nombre;
 	private String apellidos;
 	private int ip;

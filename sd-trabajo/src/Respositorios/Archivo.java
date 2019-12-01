@@ -1,9 +1,13 @@
 package Respositorios;
 import java.io.File;
 import java.util.Date;
+import java.io.Serializable;
+public class Archivo implements Serializable {
 
-public class Archivo {
-
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private File archivo;
 	private Date fecha;
 	public Date getFecha() {

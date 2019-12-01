@@ -1,8 +1,13 @@
 package Respositorios;
+import java.io.Serializable;
 import java.util.List;
 
-public class Cuenta {
+public class Cuenta implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private List<Repositorio> repositorios;
 	private Autor autor;
 	public List<Repositorio> getRepositorios() {
