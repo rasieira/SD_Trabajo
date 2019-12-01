@@ -1,3 +1,4 @@
+package Cliente;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
@@ -8,6 +9,8 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+
+import Respositorios.Repositorio;
 
 public class Cliente {
 	private static List<Repositorio> repositoriosLocalesConfirmados = new ArrayList<Repositorio>();

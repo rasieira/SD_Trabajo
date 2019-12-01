@@ -1,3 +1,4 @@
+package Server;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -9,6 +10,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+
+import Respositorios.Repositorio;
 
 public class Server {
 	private static List<Repositorio> repositorios = new ArrayList<Repositorio>();
