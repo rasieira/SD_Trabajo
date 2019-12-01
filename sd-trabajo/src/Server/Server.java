@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import Respositorios.Repositorio;
 import Server.AtenderPeticion;
 
-public class ServerNuevo {
+public class Server {
 	public static void main(String[] args)
 	{
 		List<Repositorio> repositorios = new ArrayList<Repositorio>();

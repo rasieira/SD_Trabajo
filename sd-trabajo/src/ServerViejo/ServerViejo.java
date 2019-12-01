@@ -13,7 +13,7 @@ import java.util.List;
 
 import Respositorios.Repositorio;
 
-public class Server {
+public class ServerViejo {
 	private static List<Repositorio> repositorios = new ArrayList<Repositorio>();
 
 	@SuppressWarnings({ "resource", "unlikely-arg-type" })
