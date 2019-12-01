@@ -23,6 +23,7 @@ public class AtenderPeticion implements Runnable {
 		AtenderPeticion.repositorios=repositorios;
 	}
 	
+	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void run() {
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(S.getInputStream()));
