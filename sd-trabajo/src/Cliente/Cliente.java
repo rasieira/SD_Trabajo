@@ -14,13 +14,21 @@ import Respositorios.Repositorio;
 
 public class Cliente {
 	private static List<Repositorio> repositoriosLocalesConfirmados = new ArrayList<Repositorio>();
-	public static void main(String[] args)
+	private String host;
+	private int puerto;
+	public Cliente(String host,int puerto)
 	{
-		try (Socket s = new Socket("localhost", 6666);
+		this.puerto=puerto;
+		this.host=host;
+	}
+	
+	public void conectar()
+	{
+		try (Socket s = new Socket(host, puerto);
 				BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
 		{
-			String opcion=args[0];
+			String opcion="ADD";//Prueba, solicitar por teclado en la realidad-
 			if (opcion=="ADD")
 			{
 				out.write("ADD " + "prueba" + "\r\n");
@@ -47,5 +55,4 @@ public class Cliente {
 			e.printStackTrace();
 		}
 	}
-
 }
