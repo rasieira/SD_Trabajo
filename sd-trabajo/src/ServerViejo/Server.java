@@ -1,7 +1,7 @@
-package Server;
+package ServerViejo;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
@@ -90,8 +90,8 @@ public class Server {
 								repo=repositorios.get(i);
 							}
 						}
-						ByteArrayOutputStream bs= new ByteArrayOutputStream();
-						ObjectOutputStream oos=new ObjectOutputStream(bs);
+						FileOutputStream f=new FileOutputStream("prueba");
+						ObjectOutputStream oos=new ObjectOutputStream(f);
 						oos.writeObject(repo);
 						oos.flush();
 						oos.close();
