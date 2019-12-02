@@ -23,14 +23,13 @@ public class Cliente {
 		this.puerto=puerto;
 		this.host=host;
 	}
-	public void clonar(String repositorio,Date fecha)
+	public void clonar(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
 				InputStreamReader in = new InputStreamReader(s.getInputStream());
 				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
 		{
-			String fech=Long.toString(fecha.getTime());
-			out.write("CLONE " + repositorio +" "+fech+"\r\n");
+			out.write("CLONE " + repositorio +"\r\n");
 			out.flush();
 			FileOutputStream f=new FileOutputStream("prueba");
 			ObjectOutputStream oos=new ObjectOutputStream(f);
