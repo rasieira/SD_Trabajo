@@ -1,8 +1,6 @@
 package Server;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
@@ -10,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Respositorios.Repositorio;
 
@@ -32,11 +31,10 @@ public class AtenderPeticion implements Runnable {
 			String request = in.readLine();
 
 			String[] request_array = request.split(" ");
-			if ((!request_array[0].equals("PULL") 
-							&& !request_array[0].equals("COMMIT")
-							&& !request_array[0].equals("CLONE")
-							&& !request_array[0].equals("REMOVE")
-							&& !request_array[0].equals("ADD")))
+			if ((!request_array[0].equals("CLONE") 
+							&& !request_array[0].equals("ADD")
+							&& !request_array[0].equals("PUSH")
+							&& !request_array[0].equals("REMOVE")))
 			{
 				out.write("ERROR\r\n");
 				out.flush();
@@ -85,11 +83,32 @@ public class AtenderPeticion implements Runnable {
 					ObjectOutputStream oos=new ObjectOutputStream(S.getOutputStream());
 					oos.writeObject(repo);
 					oos.flush();
-					//out.write("Clonado");
 					out.flush();
 				} else
 				{
 					out.write( request_array[1]+ " no existe\r\n");
+					out.flush();
+				}
+	
+			}
+			if (request_array[0].equals("REMOVE"))
+			{
+				boolean aux=false;
+				for(int i=0;i<repositorios.size();i++)
+				{
+					if(repositorios.get(i).getNombre().equals(request_array[1])&&(!aux))
+					{
+						aux=true;
+					}
+				}
+				if (aux)
+				{
+					List<Repositorio> nombrados = repositorios.stream().filter(n -> n.getNombre().equals(request_array[1])).collect(Collectors.toList());
+					repositorios.removeAll(nombrados);
+					out.flush();
+				} else
+				{
+					out.write(request_array[1]+"no existe\r\n");
 					out.flush();
 				}
 	

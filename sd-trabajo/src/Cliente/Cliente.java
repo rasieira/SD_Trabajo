@@ -33,7 +33,6 @@ public class Cliente {
 			{
 				out.write("ADD " + "prueba" + "\r\n");
 				out.flush();
-				//System.out.println(in.readLine());
 			}
 			if(opcion=="CLONE")
 			{
@@ -49,6 +48,14 @@ public class Cliente {
 				ois.close();
 				oos.close();
 				
+			}
+			if(opcion=="REMOVE")
+			{
+				out.write("REMOVE " + "prueba" + "\r\n");
+				out.flush();
+			}
+			if(opcion=="PUSH")
+			{
 			}
 		} catch (IOException e)
 		{
