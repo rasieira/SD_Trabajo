@@ -36,7 +36,8 @@ public class AtenderPeticion implements Runnable {
 			if ((!request_array[0].equals("CLONE") 
 							&& !request_array[0].equals("ADD")
 							&& !request_array[0].equals("PUSH")
-							&& !request_array[0].equals("REMOVE")))
+							&& !request_array[0].equals("REMOVE")
+							&& !request_array[0].equals("PULL")))
 			{
 				out.write("ERROR\r\n");
 				out.flush();
@@ -127,6 +128,11 @@ public class AtenderPeticion implements Runnable {
 				oos.flush();
 				ois.close();
 				oos.close();
+			}
+			//tal vez no haga falta el PULL o lo podriamos meter en el clone
+			if(request_array[0].equals("PULL"))
+			{
+				
 			}
 
 	} catch (IOException e) {
