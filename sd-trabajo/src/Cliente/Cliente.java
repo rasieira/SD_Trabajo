@@ -56,6 +56,48 @@ public class Cliente {
 			}
 			if(opcion=="PUSH")
 			{
+				out.write("PUSH " + "prueba" + "\r\n");
+				out.flush();
+				Repositorio repo=null;
+				for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
+				{
+					if(repositoriosLocalesConfirmados.get(i).getNombre().equals("prueba"))
+					{
+						repo=repositoriosLocalesConfirmados.get(i);
+					}
+				}
+				
+				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());
+				oos.writeObject(repo);
+				oos.flush();
+				out.flush();
+			}
+			if(opcion=="PULL")
+			{
+				out.write("PULL " + "prueba" + "\r\n");
+				out.flush();
+				FileOutputStream f=new FileOutputStream("prueba");
+				ObjectOutputStream oos=new ObjectOutputStream(f);
+				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
+				Repositorio repo=(Repositorio) ois.readObject();
+				Repositorio repoActual=null;
+				for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
+				{
+					if(repositoriosLocalesConfirmados.get(i).getNombre().equals("prueba"))
+					{
+						repoActual=repositoriosLocalesConfirmados.get(i);
+					}
+				}
+				//if()
+						{
+							repositoriosLocalesConfirmados.add(repo);
+						}
+				
+				oos.writeObject(repo);
+				oos.flush();
+				ois.close();
+				oos.close();
+				
 			}
 		} catch (IOException e)
 		{
