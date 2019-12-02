@@ -10,7 +10,6 @@ public class Repositorio implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String nombre;
 	private List<Archivo> archivos;
-	private Date fecha;
 	public Repositorio(String nombre) {
 		this.setNombre(nombre);
 		this.archivos = null;
@@ -26,11 +25,5 @@ public class Repositorio implements Serializable {
 	}
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
-	}
-	public Date getFecha() {
-		return fecha;
-	}
-	public void setFecha(Date fecha) {
-		this.fecha = fecha;
 	}
 }

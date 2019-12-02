@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,90 +22,126 @@ public class Cliente {
 		this.puerto=puerto;
 		this.host=host;
 	}
-	
-	public void conectar()
+	public void clonar(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
 				InputStreamReader in = new InputStreamReader(s.getInputStream());
 				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
 		{
-			String opcion="CLONE";//Prueba, solicitar por teclado en la realidad-
-			if (opcion=="ADD")
-			{
-				out.write("ADD " + "prueba" + "\r\n");
-				out.flush();
-			}
-			if(opcion=="CLONE")
-			{
-				out.write("CLONE " + "prueba" + "\r\n");
-				out.flush();
-				FileOutputStream f=new FileOutputStream("prueba");
-				ObjectOutputStream oos=new ObjectOutputStream(f);
-				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
-				Repositorio repo=(Repositorio) ois.readObject();
-				repositoriosLocalesConfirmados.add(repo);
-				oos.writeObject(repo);
-				oos.flush();
-				ois.close();
-				oos.close();
-				
-			}
-			if(opcion=="REMOVE")
-			{
-				out.write("REMOVE " + "prueba" + "\r\n");
-				out.flush();
-			}
-			if(opcion=="PUSH")
-			{
-				out.write("PUSH " + "prueba" + "\r\n");
-				out.flush();
-				Repositorio repo=null;
-				for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
-				{
-					if(repositoriosLocalesConfirmados.get(i).getNombre().equals("prueba"))
-					{
-						repo=repositoriosLocalesConfirmados.get(i);
-					}
-				}
-				
-				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());
-				oos.writeObject(repo);
-				oos.flush();
-				out.flush();
-			}
-			if(opcion=="PULL")
-			{
-				out.write("PULL " + "prueba" + "\r\n");
-				out.flush();
-				FileOutputStream f=new FileOutputStream("prueba");
-				ObjectOutputStream oos=new ObjectOutputStream(f);
-				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
-				Repositorio repo=(Repositorio) ois.readObject();
-				Repositorio repoActual=null;
-				for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
-				{
-					if(repositoriosLocalesConfirmados.get(i).getNombre().equals("prueba"))
-					{
-						repoActual=repositoriosLocalesConfirmados.get(i);
-					}
-				}
-				//if()
-						{
-							repositoriosLocalesConfirmados.add(repo);
-						}
-				
-				oos.writeObject(repo);
-				oos.flush();
-				ois.close();
-				oos.close();
-				
-			}
-		} catch (IOException e)
+			out.write("CLONE " + repositorio + "\r\n");
+			out.flush();
+			FileOutputStream f=new FileOutputStream("prueba");
+			ObjectOutputStream oos=new ObjectOutputStream(f);
+			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
+			Repositorio repo=(Repositorio) ois.readObject();
+			repositoriosLocalesConfirmados.add(repo);
+			oos.writeObject(repo);
+			oos.flush();
+			ois.close();
+			oos.close();
+			
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	public void añadir(String repositorio)
+	{
+		try (Socket s = new Socket(host, puerto);
+				InputStreamReader in = new InputStreamReader(s.getInputStream());
+				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
 		{
+			out.write("ADD " +repositorio+ "\r\n");
+			out.flush();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void eliminar(String repositorio)
+	{
+		try (Socket s = new Socket(host, puerto);
+				InputStreamReader in = new InputStreamReader(s.getInputStream());
+				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
+		{
+			out.write("REMOVE " + repositorio + "\r\n");
+			out.flush();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void push(String repositorio)
+	{
+		try (Socket s = new Socket(host, puerto);
+				InputStreamReader in = new InputStreamReader(s.getInputStream());
+				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
+		{
+			out.write("PUSH " + repositorio + "\r\n");
+			out.flush();
+			Repositorio repo=null;
+			for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
+			{
+				if(repositoriosLocalesConfirmados.get(i).getNombre().equals("prueba"))
+				{
+					repo=repositoriosLocalesConfirmados.get(i);
+				}
+			}
+			
+			ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());
+			oos.writeObject(repo);
+			oos.flush();
+			out.flush();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void pull(String repositorio)
+	{
+		try (Socket s = new Socket(host, puerto);
+				InputStreamReader in = new InputStreamReader(s.getInputStream());
+				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
+		{
+			//Se queda con el repositorio con fecha mas reciente
+			//REVISAR!!!!!
+			out.write("CLONE " + repositorio + "\r\n");
+			out.flush();
+			FileOutputStream f=new FileOutputStream("prueba");
+			ObjectOutputStream oos=new ObjectOutputStream(f);
+			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
+			Repositorio repo=(Repositorio) ois.readObject();
+			repositoriosLocalesConfirmados.add(repo);
+			oos.writeObject(repo);
+			oos.flush();
+			ois.close();
+			oos.close();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
 }
