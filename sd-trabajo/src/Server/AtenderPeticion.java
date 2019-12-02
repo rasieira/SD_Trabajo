@@ -27,7 +27,7 @@ public class AtenderPeticion implements Runnable {
 	@Override
 	public void run() {
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(S.getInputStream()));
-				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(S.getOutputStream()));)
+				OutputStreamWriter out = new OutputStreamWriter(S.getOutputStream());)
 		{
 			String request = in.readLine();
 
@@ -82,12 +82,10 @@ public class AtenderPeticion implements Runnable {
 							repo=repositorios.get(i);
 						}
 					}
-					ByteArrayOutputStream bs= new ByteArrayOutputStream();
-					ObjectOutputStream oos=new ObjectOutputStream(bs);
+					ObjectOutputStream oos=new ObjectOutputStream(S.getOutputStream());
 					oos.writeObject(repo);
 					oos.flush();
-					oos.close();
-					out.write("Clonado");
+					//out.write("Clonado");
 					out.flush();
 				} else
 				{

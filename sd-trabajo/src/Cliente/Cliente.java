@@ -1,10 +1,10 @@
 package Cliente;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -25,26 +25,29 @@ public class Cliente {
 	public void conectar()
 	{
 		try (Socket s = new Socket(host, puerto);
-				BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+				InputStreamReader in = new InputStreamReader(s.getInputStream());
 				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
 		{
-			String opcion="ADD";//Prueba, solicitar por teclado en la realidad-
+			String opcion="CLONE";//Prueba, solicitar por teclado en la realidad-
 			if (opcion=="ADD")
 			{
 				out.write("ADD " + "prueba" + "\r\n");
 				out.flush();
-				System.out.println(in.readLine());
+				//System.out.println(in.readLine());
 			}
-			if(opcion=="CLONE ")
+			if(opcion=="CLONE")
 			{
 				out.write("CLONE " + "prueba" + "\r\n");
 				out.flush();
-				FileInputStream f=new FileInputStream("prueba");
-				ObjectInputStream ois=new ObjectInputStream(f);
+				FileOutputStream f=new FileOutputStream("prueba");
+				ObjectOutputStream oos=new ObjectOutputStream(f);
+				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
 				Repositorio repo=(Repositorio) ois.readObject();
 				repositoriosLocalesConfirmados.add(repo);
-				
+				oos.writeObject(repo);
+				oos.flush();
 				ois.close();
+				oos.close();
 				
 			}
 		} catch (IOException e)
