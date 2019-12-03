@@ -10,6 +10,10 @@ public class Archivo implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private File archivo;
 	private Date fecha;
+	public Archivo(File f1, Date d1) {
+		this.archivo=f1;
+		this.fecha=d1;
+	}
 	public Date getFecha() {
 		return fecha;
 	}
