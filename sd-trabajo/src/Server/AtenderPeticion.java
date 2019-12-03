@@ -43,13 +43,20 @@ public class AtenderPeticion implements Runnable {
 				throw new IllegalArgumentException("Formato de comando incorrecto");
 			}
 
+			boolean noExiste=false;
 			if (request_array[0].equals("ADD"))
 			{
-				if ((repositorios.contains(request_array[1])))
+				for(int i=0;i<repositorios.size();i++)
 				{
-					out.write("Ya existe un repositorio con ese nombre\r\n");
-					out.flush();
-				} else
+					if(repositorios.get(i).getNombre().equals(request_array[1]))
+					{
+						noExiste=true;
+						out.write("Ya existe un repositorio con ese nombre\r\n");
+						out.flush();
+					}
+				}
+				} 
+			if(noExiste)
 				{
 					Repositorio repo=new Repositorio(request_array[1]);
 					repositorios.add(repo);
@@ -60,8 +67,6 @@ public class AtenderPeticion implements Runnable {
 					out.write( request_array[1]+ " ha sido creado\r\n");
 					out.flush();
 				}
-	
-			}
 			if (request_array[0].equals("CLONE"))
 			{
 				boolean aux=false;
