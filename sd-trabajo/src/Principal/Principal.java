@@ -41,38 +41,50 @@ public class Principal {
 		}
 		@SuppressWarnings("resource")
 		Scanner sc=new Scanner(System.in);
-		int opcion=sc.nextInt();
-		switch(opcion)
+		int opcion;
+		while(true)
 		{
-		case 1:
-			System.out.println("Introduce el nombre del Repositorio que quieres clonar");
-			Scanner sc2=new Scanner(System.in);
-			String nombreRepo=sc2.nextLine();
-			c.clonar(nombreRepo);
-			break;
-		case 2:
-			System.out.println("Introduce el nombre del Repositorio que quieres subir");
-			Scanner sc21=new Scanner(System.in);
-			String nombreRepo1=sc21.nextLine();
-			c.push(nombreRepo1);
-			break;
-		case 3:
-			System.out.println("Introduce el nombre del Repositorio que quieres traerte");
-			Scanner sc211=new Scanner(System.in);
-			String nombreRepo11=sc211.nextLine();
-			c.pull(nombreRepo11);
-			break;
-		case 4:
-			System.out.println("Introduce el nombre del Repositorio que quieres eliminar");
-			Scanner sc2111=new Scanner(System.in);
-			String nombreRepo111=sc2111.nextLine();
-			c.eliminar(nombreRepo111);
-			break;
-		case 5:
-			System.out.println("Introduce el nombre del Repositorio que quieres crear");
-			Scanner sc21111=new Scanner(System.in);
-			String nombreRepo1111=sc21111.nextLine();
-			c.añadir(nombreRepo1111);
+			System.out.println("1)CLONE");
+			System.out.println("2)PUSH");
+			System.out.println("3)PULL");
+			System.out.println("4)CREMOVE");
+			System.out.println("5)CREATE/ADD");
+			opcion=sc.nextInt();
+			switch(opcion)
+			{
+			case 1:
+				System.out.println("Introduce el nombre del Repositorio que quieres clonar");
+				Scanner sc2=new Scanner(System.in);
+				String nombreRepo=sc2.nextLine();
+				c.clonar(nombreRepo);
+				break;
+			case 2:
+				System.out.println("Introduce el nombre del Repositorio que quieres subir");
+				Scanner sc21=new Scanner(System.in);
+				String nombreRepo1=sc21.nextLine();
+				c.push(nombreRepo1);
+				break;
+			case 3:
+				System.out.println("Introduce el nombre del Repositorio que quieres traerte");
+				Scanner sc211=new Scanner(System.in);
+				String nombreRepo11=sc211.nextLine();
+				c.pull(nombreRepo11);
+				break;
+			case 4:
+				System.out.println("Introduce el nombre del Repositorio que quieres eliminar");
+				Scanner sc2111=new Scanner(System.in);
+				String nombreRepo111=sc2111.nextLine();
+				c.eliminar(nombreRepo111);
+				break;
+			case 5:
+				System.out.println("Introduce el nombre del Repositorio que quieres crear");
+				Scanner sc21111=new Scanner(System.in);
+				String nombreRepo1111=sc21111.nextLine();
+				c.añadir(nombreRepo1111);
+				break;
+				default:
+					break;
+			}
 		}
 
 	}

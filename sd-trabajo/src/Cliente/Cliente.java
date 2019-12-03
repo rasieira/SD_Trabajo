@@ -113,6 +113,7 @@ public class Cliente {
 			e.printStackTrace();
 		}
 	}
+	@SuppressWarnings("unlikely-arg-type")
 	public void pull(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
