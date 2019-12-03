@@ -23,9 +23,9 @@ public class Principal {
 		List<Archivo> archivos = new ArrayList<Archivo>();
 		String nombre=null;
 		long numero;
-		for(int i=0;i<30;i++)
+		for(int i=0;i<20;i++)
 		{
-			for(int j=0; j<30;j++)
+			for(int j=0; j<20;j++)
 			{
 				numero= (long) (Math.random()*10+1*1000000);
 				nombre="prueba"+i;
