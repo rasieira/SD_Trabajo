@@ -29,7 +29,7 @@ public class Server {
 		{
 			for(int j=0; j<30;j++)
 			{
-				numero= (long) (Math.random()*10+1*1000000);
+				numero= (long) (Math.random()*10*Math.random()+1*1000000*Math.random());
 				nombre="prueba"+i;
 				d1=new Date(numero);
 				f1=new File(nombre);
