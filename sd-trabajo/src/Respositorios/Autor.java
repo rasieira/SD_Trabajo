@@ -1,6 +1,7 @@
 
 package Respositorios;
 import java.io.Serializable;
+import java.util.HashMap;
 public class Autor implements Serializable {
 
 	/**
@@ -12,6 +13,7 @@ public class Autor implements Serializable {
 	private int ip;
 	@SuppressWarnings("unused")
 	private String contraseña;
+	private HashMap<String, String> userPass = new HashMap<String, String>();
 	private Autor()
 	{
 		this.nombre=null;
@@ -45,6 +47,12 @@ public class Autor implements Serializable {
 	}
 	public void setIp(int ip) {
 		this.ip = ip;
+	}
+	public HashMap<String, String> getUserPass() {
+		return userPass;
+	}
+	public void setUserPass(HashMap<String, String> userPass) {
+		this.userPass = userPass;
 	}
 	
 }
