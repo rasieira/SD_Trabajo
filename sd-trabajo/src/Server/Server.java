@@ -25,9 +25,9 @@ public class Server {
 		List<Archivo> archivos = new ArrayList<Archivo>();
 		String nombre=null;
 		long numero;
-		for(int i=0;i<30;i++)
+		for(int i=0;i<10;i++)
 		{
-			for(int j=0; j<30;j++)
+			for(int j=0; j<5;j++)
 			{
 				numero= (long) (Math.random()*10*Math.random()+1*1000000*Math.random());
 				nombre="prueba"+i;

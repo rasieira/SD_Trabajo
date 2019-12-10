@@ -1,5 +1,7 @@
 package Cliente;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,20 +11,51 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import Respositorios.Repositorio;
 
 public class Cliente {
+	private static String RUTA_DEL_MAP = "base_de_datos_toguapa";
+	private static Map<String, String> repositoriosSerializados = new HashMap<>(); 
 	private static List<Repositorio> repositoriosLocalesConfirmados = new ArrayList<Repositorio>();
-	private String host;
-	private int puerto;
+	private static String host="localhost";
+	private static int puerto=6666;
+	
+	public static void init() {
+		// traernos el map.
+		if(!new File(RUTA_DEL_MAP).exists())
+			return;
+		try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(RUTA_DEL_MAP))) {
+			Object leido = ois.readObject();
+			if(leido instanceof Map<?,?>) {
+				repositoriosSerializados = (Map<String,String>) leido;
+			}
+		} catch(IOException|ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		// construimos la lista a partir del map
+		for(String nombreRepositorio : repositoriosSerializados.keySet())
+		{
+			Repositorio r = null;
+			try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(repositoriosSerializados.get(nombreRepositorio)))) {
+				r = (Repositorio) ois.readObject();
+			} catch (IOException|ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			
+			if(r!=null)
+				repositoriosLocalesConfirmados.add(r);
+		}
+	}
 	public Cliente(String host,int puerto)
 	{
-		this.puerto=puerto;
-		this.host=host;
+		Cliente.puerto=puerto;
+		Cliente.host=host;
 	}
-	public void clonar(String repositorio)
+	public static void clonar(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
 				InputStreamReader in = new InputStreamReader(s.getInputStream());
@@ -30,15 +63,27 @@ public class Cliente {
 		{
 			out.write("CLONE " + repositorio +"\r\n");
 			out.flush();
-			FileOutputStream f=new FileOutputStream("prueba");
+			FileOutputStream f=new FileOutputStream(repositorio);
 			ObjectOutputStream oos=new ObjectOutputStream(f);
 			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
 			Repositorio repo=(Repositorio) ois.readObject();
-			getRepositoriosLocalesConfirmados().add(repo);
-			oos.writeObject(repo);
+			if(estaEnLocal(repositorio))
+			{
+				Cliente.pull(repositorio);
+			}
+			else
+			{
+				getRepositoriosLocalesConfirmados().add(repo);
+				oos.writeObject(repo);
+				repositoriosSerializados.put(repositorio, repositorio); //el segundo es la ruta
+			}
 			oos.flush();
 			ois.close();
 			oos.close();
+			
+			ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
+			elMap.writeObject(repositoriosSerializados);
+			elMap.close();
 			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -52,14 +97,18 @@ public class Cliente {
 		}
 		
 	}
-	public void añadir(String repositorio)
+	public static void añadir(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
 				InputStreamReader in = new InputStreamReader(s.getInputStream());
 				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
 		{
+			char[] respuesta = new char[255];
 			out.write("ADD " +repositorio+ "\r\n");
 			out.flush();
+			while(in.read(respuesta) != -1) {
+				System.out.println(respuesta);
+			}
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -68,7 +117,7 @@ public class Cliente {
 			e.printStackTrace();
 		}
 	}
-	public void eliminar(String repositorio)
+	public static void eliminar(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
 				InputStreamReader in = new InputStreamReader(s.getInputStream());
@@ -84,7 +133,7 @@ public class Cliente {
 			e.printStackTrace();
 		}
 	}
-	public void push(String repositorio)
+	public static void push(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
 				InputStreamReader in = new InputStreamReader(s.getInputStream());
@@ -114,7 +163,7 @@ public class Cliente {
 		}
 	}
 	@SuppressWarnings("unlikely-arg-type")
-	public void pull(String repositorio)
+	public static void pull(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
 				InputStreamReader in = new InputStreamReader(s.getInputStream());
@@ -124,23 +173,28 @@ public class Cliente {
 			//REVISAR!!!!!
 			out.write("CLONE " + repositorio+"\r\n");
 			out.flush();
-			FileOutputStream f=new FileOutputStream("prueba");
+			FileOutputStream f=new FileOutputStream(repositorio);
 			ObjectOutputStream oos=new ObjectOutputStream(f);
 			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
-			Repositorio repo=(Repositorio) ois.readObject();
-			Repositorio repoActual=null;
+			Repositorio remote=(Repositorio) ois.readObject();
+			Repositorio local=null;
+			List<Repositorio> listadeloscojones = Cliente.getRepositoriosLocalesConfirmados();
 			for(int i=0;i<Cliente.getRepositoriosLocalesConfirmados().size();i++)
 			{
-				if(Cliente.getRepositoriosLocalesConfirmados().get(i).equals(repositorio))
+				if(Cliente.getRepositoriosLocalesConfirmados().get(i).getNombre().equals(repositorio))
 				{
-					repoActual=Cliente.getRepositoriosLocalesConfirmados().get(i);
+					local=Cliente.getRepositoriosLocalesConfirmados().get(i);
 				}
 			}
-			if(repo.getFechaModif().getTime()>=repoActual.getFechaModif().getTime())
+			if((local==null)||(remote.getFechaModif().getTime()>=local.getFechaModif().getTime()))
 			{
-				getRepositoriosLocalesConfirmados().add(repo);
+				getRepositoriosLocalesConfirmados().add(remote);
+				repositoriosSerializados.put(repositorio, repositorio); // el segundo es la ruta
 			}
-			oos.writeObject(repo);
+			oos.writeObject(remote);
+			ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
+			elMap.writeObject(repositoriosSerializados);
+			elMap.close();
 			oos.flush();
 			ois.close();
 			oos.close();
@@ -160,6 +214,25 @@ public class Cliente {
 	}
 	public static void setRepositoriosLocalesConfirmados(List<Repositorio> repositoriosLocalesConfirmados) {
 		Cliente.repositoriosLocalesConfirmados = repositoriosLocalesConfirmados;
+	}
+	public static boolean estaEnLocal(String nombre)
+	{
+		boolean esta=false;
+		for(int i=0; i<getRepositoriosLocalesConfirmados().size();i++)
+		{
+			if(getRepositoriosLocalesConfirmados().get(i).getNombre().equals(nombre))
+			{
+				esta=true;
+			}
+		}
+		return esta;
+	}
+	public static void listar()
+	{
+		for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
+		{
+			System.out.println(repositoriosLocalesConfirmados.get(i).getNombre());
+		}
 	}
 
 }
