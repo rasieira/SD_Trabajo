@@ -19,11 +19,13 @@ import Respositorios.Archivo;
 import Respositorios.Repositorio;
 
 public class Server {
+	private static String RUTA_DEL_MAP = "base_de_datos_server";
 	private static Map<String, String> repositoriosSerializadosServer = new HashMap<>();
 	@SuppressWarnings("unchecked")
-	public static void main(String[] args)
+	public static void main(String[] args) throws FileNotFoundException, IOException
 	{
 
+		ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
 		//////////////////////////////////////////////////////////////
 		Archivo a1=null;
 		Date d1=null;
@@ -67,11 +69,12 @@ public class Server {
 				e.printStackTrace();
 			}
 			repositoriosSerializadosServer.put(r1.getNombre(), r1.getNombre());
+			elMap.writeObject(repositoriosSerializadosServer);
 		}
 
-		if(!new File("base_de_datos_server").exists()) return;
+		if(!new File(RUTA_DEL_MAP).exists())return;
 		List<Repositorio> repositorios = new ArrayList<Repositorio>();
-		try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream("base_de_datos_server"))) {
+		try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(RUTA_DEL_MAP))) {
 			Object leido = ois.readObject();
 			if(leido instanceof Map<?,?>) {
 				repositoriosSerializadosServer = (Map<String,String>) leido;
@@ -94,6 +97,7 @@ public class Server {
 			if(r!=null)
 				repositorios.add(r);
 		}
+		
 		///////////////////////////////////////////////////////////////
 		//Crear el listado de Respositorios y pasarselo al atender peticion
 		ExecutorService pool = Executors.newCachedThreadPool();
