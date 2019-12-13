@@ -9,17 +9,13 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import Respositorios.Repositorio;
 
 public class AtenderPeticion implements Runnable {
 
-	private static String RUTA_DEL_MAP="base_de_datos_server";
-	private static Map<String,String> repositoriosSerializadosServer=new HashMap<>();
 	private static List<Repositorio> repositorios = new ArrayList<Repositorio>();
 	private Socket S;
 	public AtenderPeticion(Socket S,List<Repositorio> repositorios )
@@ -28,7 +24,6 @@ public class AtenderPeticion implements Runnable {
 		AtenderPeticion.repositorios=repositorios;
 	}
 	
-	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void run() {
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(S.getInputStream()));

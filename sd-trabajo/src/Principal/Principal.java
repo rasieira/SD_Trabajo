@@ -1,17 +1,12 @@
 package Principal;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 import Cliente.Cliente;
-import Respositorios.Repositorio;
 
 public class Principal {
 
 	public static void main(String[] args) {
-		List<Repositorio> repositorios = new ArrayList<Repositorio>();
-		Cliente.setRepositoriosLocalesConfirmados(repositorios);
 		Cliente.init();
 		@SuppressWarnings("resource")
 		Scanner sc=new Scanner(System.in);

@@ -21,12 +21,38 @@ import Respositorios.Repositorio;
 public class Server {
 	private static String RUTA_DEL_MAP = "base_de_datos_server";
 	private static Map<String, String> repositoriosSerializadosServer = new HashMap<>();
+	private static List<Repositorio> repositoriosLocalesServer = new ArrayList<Repositorio>();
 	@SuppressWarnings("unchecked")
-	public static void main(String[] args) throws FileNotFoundException, IOException
+	public static void leerBD()
 	{
 
-		ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
-		//////////////////////////////////////////////////////////////
+		if(!new File(RUTA_DEL_MAP).exists())return;
+		try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(RUTA_DEL_MAP))) {
+			Object leido = ois.readObject();
+			if(leido instanceof Map<?,?>) {
+				repositoriosSerializadosServer = (Map<String,String>) leido;
+			}
+		} catch(IOException|ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		
+		for(String nombreRepositorio : repositoriosSerializadosServer.keySet())
+		{
+			Repositorio r = null;
+			try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(repositoriosSerializadosServer.get(nombreRepositorio)))) {
+				r = (Repositorio) ois.readObject();
+			} catch (IOException|ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			
+			if(r!=null) repositoriosLocalesServer.add(r);
+		}
+		
+	}
+	public static void crearRepositoriosPrueba()
+	{
+		ObjectOutputStream elMap =null;
 		Archivo a1=null;
 		Date d1=null;
 		File f1=null;
@@ -38,17 +64,17 @@ public class Server {
 		{
 			for(int j=0; j<5;j++)
 			{
-			numero= (long) (Math.random()*10*Math.random()+1*1000000*Math.random());
-			nombre="prueba"+i;
-			d1=new Date(numero);
-			f1=new File(nombre);
-			a1=new Archivo(f1,d1);
-			archivos.add(a1);
+				numero= (long) (Math.random()*10*Math.random()+1*1000000*Math.random());
+				nombre="prueba"+i;
+				d1=new Date(numero);
+				f1=new File(nombre);
+				a1=new Archivo(f1,d1);
+				archivos.add(a1);
 			}
-			r1=new Repositorio(nombre);
-			r1.actualizarFechaModificacion();
-			r1.setArchivos(archivos);
-			FileOutputStream f = null;
+				r1=new Repositorio(nombre);
+				r1.actualizarFechaModificacion();
+				r1.setArchivos(archivos);
+				FileOutputStream f = null;
 			try {
 				f = new FileOutputStream(r1.getNombre());
 			} catch (FileNotFoundException e) {
@@ -69,37 +95,32 @@ public class Server {
 				e.printStackTrace();
 			}
 			repositoriosSerializadosServer.put(r1.getNombre(), r1.getNombre());
-			elMap.writeObject(repositoriosSerializadosServer);
+			
 		}
-
-		if(!new File(RUTA_DEL_MAP).exists())return;
-		List<Repositorio> repositorios = new ArrayList<Repositorio>();
-		try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(RUTA_DEL_MAP))) {
-			Object leido = ois.readObject();
-			if(leido instanceof Map<?,?>) {
-				repositoriosSerializadosServer = (Map<String,String>) leido;
-			}
-		} catch(IOException|ClassNotFoundException e) {
+		try {
+			elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// construimos la lista a partir del map
-		
-		
-		for(String nombreRepositorio : repositoriosSerializadosServer.keySet())
-		{
-			Repositorio r = null;
-			try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(repositoriosSerializadosServer.get(nombreRepositorio)))) {
-				r = (Repositorio) ois.readObject();
-			} catch (IOException|ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-			
-			if(r!=null)
-				repositorios.add(r);
+		try {
+			elMap.writeObject(repositoriosSerializadosServer);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			elMap.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
-		///////////////////////////////////////////////////////////////
-		//Crear el listado de Respositorios y pasarselo al atender peticion
+	}
+	public static void main(String[] args) throws FileNotFoundException, IOException
+	{
+		Server.crearRepositoriosPrueba();
+		Server.leerBD();
 		ExecutorService pool = Executors.newCachedThreadPool();
 		
 		ServerSocket SS;
@@ -117,7 +138,7 @@ public class Server {
 		{
 			try
 			{
-				pool.submit(new AtenderPeticion(SS.accept(),repositorios));
+				pool.submit(new AtenderPeticion(SS.accept(),repositoriosLocalesServer));
 			}
 			catch(IOException e)
 			{
@@ -134,6 +155,4 @@ public class Server {
 		{
 			e.printStackTrace();
 		}
-	}
-
-}
+	}}

@@ -24,6 +24,7 @@ public class Cliente {
 	private static String host="localhost";
 	private static int puerto=6666;
 	
+	@SuppressWarnings("unchecked")
 	public static void init() {
 		// traernos el map.
 		if(!new File(RUTA_DEL_MAP).exists())
@@ -162,7 +163,7 @@ public class Cliente {
 			e.printStackTrace();
 		}
 	}
-	@SuppressWarnings("unlikely-arg-type")
+	@SuppressWarnings("unused")
 	public static void pull(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
