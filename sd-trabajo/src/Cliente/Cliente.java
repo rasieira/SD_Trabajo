@@ -18,7 +18,7 @@ import java.util.Map;
 import Respositorios.Repositorio;
 
 public class Cliente {
-	private static String RUTA_DEL_MAP = "base_de_datos_toguapa";
+	private static String RUTA_DEL_MAP = "base_de_datos_cliente";
 	private static Map<String, String> repositoriosSerializados = new HashMap<>(); 
 	private static List<Repositorio> repositoriosLocalesConfirmados = new ArrayList<Repositorio>();
 	private static String host="localhost";
@@ -64,7 +64,7 @@ public class Cliente {
 		{
 			out.write("CLONE " + repositorio +"\r\n");
 			out.flush();
-			FileOutputStream f=new FileOutputStream(repositorio);
+			FileOutputStream f=new FileOutputStream(repositorio+"Cliente");
 			ObjectOutputStream oos=new ObjectOutputStream(f);
 			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
 			Repositorio repo=(Repositorio) ois.readObject();
@@ -76,7 +76,7 @@ public class Cliente {
 			{
 				getRepositoriosLocalesConfirmados().add(repo);
 				oos.writeObject(repo);
-				repositoriosSerializados.put(repositorio, repositorio); //el segundo es la ruta
+				repositoriosSerializados.put(repositorio+"Cliente", repositorio+"Cliente"); //el segundo es la ruta
 			}
 			oos.flush();
 			ois.close();

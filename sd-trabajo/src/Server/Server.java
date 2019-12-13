@@ -60,18 +60,18 @@ public class Server {
 		List<Archivo> archivos = new ArrayList<Archivo>();
 		String nombre=null;
 		long numero;
+		for(int j=0; j<5;j++)
+		{
+			numero= (long) (Math.random()*10*Math.random()+1*1000000*Math.random());
+			nombre="pruebaArchivo"+j;
+			d1=new Date(numero);
+			f1=new File(nombre);
+			a1=new Archivo(f1,d1);
+			archivos.add(a1);
+		}
 		for(int i=0;i<4;i++)
 		{
-			for(int j=0; j<5;j++)
-			{
-				numero= (long) (Math.random()*10*Math.random()+1*1000000*Math.random());
-				nombre="prueba"+i;
-				d1=new Date(numero);
-				f1=new File(nombre);
-				a1=new Archivo(f1,d1);
-				archivos.add(a1);
-			}
-				r1=new Repositorio(nombre);
+				r1=new Repositorio("pruebaRepositorio"+i);
 				r1.actualizarFechaModificacion();
 				r1.setArchivos(archivos);
 				FileOutputStream f = null;
@@ -95,6 +95,7 @@ public class Server {
 				e.printStackTrace();
 			}
 			repositoriosSerializadosServer.put(r1.getNombre(), r1.getNombre());
+
 			
 		}
 		try {
@@ -122,7 +123,7 @@ public class Server {
 		Server.crearRepositoriosPrueba();
 		Server.leerBD();
 		ExecutorService pool = Executors.newCachedThreadPool();
-		
+
 		ServerSocket SS;
 		try
 		{
