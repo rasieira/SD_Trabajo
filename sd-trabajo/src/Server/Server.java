@@ -19,9 +19,9 @@ import Respositorios.Archivo;
 import Respositorios.Repositorio;
 
 public class Server {
-	private static String RUTA_DEL_MAP = "base_de_datos_server";
-	private static Map<String, String> repositoriosSerializadosServer = new HashMap<>();
-	private static List<Repositorio> repositoriosLocalesServer = new ArrayList<Repositorio>();
+	public static String RUTA_DEL_MAP = "base_de_datos_server";
+	public static Map<String, String> repositoriosSerializadosServer = new HashMap<>();
+	public static List<Repositorio> repositoriosLocalesServer = new ArrayList<Repositorio>();
 	@SuppressWarnings("unchecked")
 	public static void leerBD()
 	{

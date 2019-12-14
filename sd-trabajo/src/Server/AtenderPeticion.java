@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import Respositorios.Repositorio;
@@ -64,7 +65,16 @@ public class AtenderPeticion implements Runnable {
 						System.out.println(repositorios.get(i).getNombre());
 					}
 					out.write( request_array[1]+ " ha sido creado\r\n");
+					FileOutputStream f = null;
+					f = new FileOutputStream(repo.getNombre());
+					ObjectOutputStream oos = new ObjectOutputStream(f);
+					oos.writeObject(repo);
+					Server.repositoriosSerializadosServer.put(repo.getNombre(), repo.getNombre());
+					ObjectOutputStream elMap =new ObjectOutputStream(new FileOutputStream(Server.RUTA_DEL_MAP));
+					elMap.writeObject(Server.repositoriosSerializadosServer);
+					Server.leerBD();
 					out.flush();
+					oos.close();
 				}
 			}
 			if (request_array[0].equals("CLONE"))
@@ -133,6 +143,7 @@ public class AtenderPeticion implements Runnable {
 				ois.close();
 				oos.close();
 			}
+			Server.leerBD();
 
 	} catch (IOException e) {
 		// TODO Auto-generated catch block
