@@ -62,22 +62,21 @@ public class Cliente {
 				InputStreamReader in = new InputStreamReader(s.getInputStream());
 				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
 		{
+			if(estaEnLocal(repositorio+"Cliente"))
+			{
+				System.out.println("Ya esta en Local");
+			}
+			else{
 			out.write("CLONE " + repositorio +"\r\n");
 			out.flush();
 			FileOutputStream f=new FileOutputStream(repositorio+"Cliente");
 			ObjectOutputStream oos=new ObjectOutputStream(f);
 			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
 			Repositorio repo=(Repositorio) ois.readObject();
-			if(estaEnLocal(repositorio))
-			{
-				Cliente.pull(repositorio);
-			}
-			else
-			{
-				getRepositoriosLocalesConfirmados().add(repo);
-				oos.writeObject(repo);
-				repositoriosSerializados.put(repositorio+"Cliente", repositorio+"Cliente"); //el segundo es la ruta
-			}
+			repo.setNombre(repo.getNombre()+"Cliente");
+			repositoriosLocalesConfirmados.add(repo);
+			oos.writeObject(repo);
+			repositoriosSerializados.put(repositorio+"Cliente", repositorio+"Cliente"); //el segundo es la ruta
 			oos.flush();
 			ois.close();
 			oos.close();
@@ -85,6 +84,7 @@ public class Cliente {
 			ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
 			elMap.writeObject(repositoriosSerializados);
 			elMap.close();
+			}
 			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -110,6 +110,7 @@ public class Cliente {
 			while(in.read(respuesta) != -1) {
 				System.out.println(respuesta);
 			}
+			clonar(repositorio);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -126,6 +127,18 @@ public class Cliente {
 		{
 			out.write("REMOVE " + repositorio+"\r\n");
 			out.flush();
+			for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
+			{
+				if(repositoriosLocalesConfirmados.get(i).getNombre().equals(repositorio+"Cliente"))
+				{
+					repositoriosLocalesConfirmados.remove(i);
+				}
+			}
+			for(String nombreRepositorio : repositoriosSerializados.keySet())
+			{
+				repositoriosSerializados.remove(nombreRepositorio);
+			}
+			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

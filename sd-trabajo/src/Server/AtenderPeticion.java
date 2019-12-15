@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import Cliente.Cliente;
 import Respositorios.Repositorio;
 
 public class AtenderPeticion implements Runnable {
@@ -53,6 +54,7 @@ public class AtenderPeticion implements Runnable {
 						noExiste=false;
 						out.write("Ya existe un repositorio con ese nombre\r\n");
 						out.flush();
+						break;
 					}
 				}
 				
