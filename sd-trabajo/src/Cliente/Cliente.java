@@ -134,14 +134,32 @@ public class Cliente {
 					repositoriosLocalesConfirmados.remove(i);
 				}
 			}
-			for(String nombreRepositorio : repositoriosSerializados.keySet())
-			{
-				repositoriosSerializados.remove(nombreRepositorio);
-			}
+			
+			repositoriosSerializados.remove(repositorio+"Cliente");
 			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Map<String, String> repositoriosSerializadosprueba = repositoriosSerializados;
+		ObjectOutputStream elMap = null;
+		try {
+			elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			elMap.writeObject(repositoriosSerializados);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			elMap.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
