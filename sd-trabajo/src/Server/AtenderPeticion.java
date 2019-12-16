@@ -72,11 +72,14 @@ public class AtenderPeticion implements Runnable {
 					ObjectOutputStream oos = new ObjectOutputStream(f);
 					oos.writeObject(repo);
 					Server.repositoriosSerializadosServer.put(repo.getNombre(), repo.getNombre());
-					ObjectOutputStream elMap =new ObjectOutputStream(new FileOutputStream(Server.RUTA_DEL_MAP));
-					elMap.writeObject(Server.repositoriosSerializadosServer);
-					Server.leerBD();
-					out.flush();
-					oos.close();
+					synchronized(Server.RUTA_DEL_MAP) {
+						ObjectOutputStream elMap =new ObjectOutputStream(new FileOutputStream(Server.RUTA_DEL_MAP));
+						elMap.writeObject(Server.repositoriosSerializadosServer);
+						Server.leerBD();
+						out.flush();
+						oos.close();
+					}
+
 				}
 			}
 			if (request_array[0].equals("CLONE"))
