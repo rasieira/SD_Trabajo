@@ -27,6 +27,8 @@ public class Cliente {
 	@SuppressWarnings("unchecked")
 	public static void init() {
 		// traernos el map.
+		File directorio = new File("BDCliente\\");
+		directorio.mkdir();
 		if(!new File(RUTA_DEL_MAP).exists())
 			return;
 		try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(RUTA_DEL_MAP))) {
@@ -62,29 +64,32 @@ public class Cliente {
 				InputStreamReader in = new InputStreamReader(s.getInputStream());
 				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
 		{
-			if(estaEnLocal(repositorio+"Cliente"))
+			if(estaEnLocal(repositorio))
 			{
 				System.out.println("Ya esta en Local");
 			}
 			else{
 			out.write("CLONE " + repositorio +"\r\n");
 			out.flush();
-			FileOutputStream f=new FileOutputStream(repositorio+"Cliente");
+			FileOutputStream f=new FileOutputStream("BDCliente\\"+repositorio);
 			ObjectOutputStream oos=new ObjectOutputStream(f);
 			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
 			Repositorio repo=(Repositorio) ois.readObject();
 			if(repo==null)
 			{
-				//SYSO
+				System.out.println("No existe ese repositorio");
+
 			}
-			repo.setNombre(repo.getNombre()+"Cliente");
-			repositoriosLocalesConfirmados.add(repo);
-			oos.writeObject(repo);
-			repositoriosSerializados.put(repositorio+"Cliente", repositorio+"Cliente"); //el segundo es la ruta
+			else 
+			{
+				repo.setNombre(repo.getNombre());
+				repositoriosLocalesConfirmados.add(repo);
+				oos.writeObject(repo);
+				repositoriosSerializados.put(repositorio, "BDCliente\\"+repositorio); //el segundo es la ruta
+			}
 			oos.flush();
 			ois.close();
 			oos.close();
-			
 			ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
 			elMap.writeObject(repositoriosSerializados);
 			elMap.close();
@@ -133,13 +138,13 @@ public class Cliente {
 			out.flush();
 			for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
 			{
-				if(repositoriosLocalesConfirmados.get(i).getNombre().equals(repositorio+"Cliente"))
+				if(repositoriosLocalesConfirmados.get(i).getNombre().equals(repositorio))
 				{
 					repositoriosLocalesConfirmados.remove(i);
 				}
 			}
 			
-			repositoriosSerializados.remove(repositorio+"Cliente");
+			repositoriosSerializados.remove(repositorio);
 			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -269,6 +274,19 @@ public class Cliente {
 		{
 			System.out.println(repositoriosLocalesConfirmados.get(i).getNombre());
 		}
+	}
+	public static void autentificarse(String user,String pass) {
+		try (Socket s = new Socket(host, puerto);
+				InputStreamReader in = new InputStreamReader(s.getInputStream());
+				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
+		{
+			out.write("LOGIN "+user+" PASSWORD "+pass+"\r\n");
+			out.flush();
+			s.shutdownOutput();
+		} catch(IOException e) {
+			
+		}
+		
 	}
 
 }

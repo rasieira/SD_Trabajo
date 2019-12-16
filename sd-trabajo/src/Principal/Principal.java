@@ -13,6 +13,11 @@ public class Principal {
 		int opcion;
 		while(true)
 		{
+			System.out.print("Usuario: ");
+			String user=sc.nextLine();
+			System.out.print("Contraseña: ");
+			String pass=sc.nextLine();
+			Cliente.autentificarse(user,pass);
 			System.out.println("1)CLONE");
 			System.out.println("2)PUSH");
 			System.out.println("3)PULL");
