@@ -136,12 +136,24 @@ public class Cliente {
 		{
 			out.write("REMOVE " + repositorio+"\r\n");
 			out.flush();
+			boolean aux=false;
 			for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
 			{
 				if(repositoriosLocalesConfirmados.get(i).getNombre().equals(repositorio))
 				{
 					repositoriosLocalesConfirmados.remove(i);
+					File archivoBorrar=new File("BDCliente\\"+repositorio);
+					archivoBorrar.delete();
+					aux=true;
 				}
+			}
+			if(aux)
+			{
+				System.out.println(repositorio+" ha sido borrado");
+			}
+			else
+			{
+				System.out.println(repositorio+" no existe");
 			}
 			
 			repositoriosSerializados.remove(repositorio);
@@ -214,12 +226,11 @@ public class Cliente {
 			//REVISAR!!!!!
 			out.write("CLONE " + repositorio+"\r\n");
 			out.flush();
-			FileOutputStream f=new FileOutputStream(repositorio);
+			FileOutputStream f=new FileOutputStream("BDCliente\\"+repositorio);
 			ObjectOutputStream oos=new ObjectOutputStream(f);
 			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
 			Repositorio remote=(Repositorio) ois.readObject();
 			Repositorio local=null;
-			List<Repositorio> listadeloscojones = Cliente.getRepositoriosLocalesConfirmados();
 			for(int i=0;i<Cliente.getRepositoriosLocalesConfirmados().size();i++)
 			{
 				if(Cliente.getRepositoriosLocalesConfirmados().get(i).getNombre().equals(repositorio))
@@ -227,11 +238,18 @@ public class Cliente {
 					local=Cliente.getRepositoriosLocalesConfirmados().get(i);
 				}
 			}
-			if((local==null)||(remote.getFechaModif().getTime()>=local.getFechaModif().getTime()))
+			if(remote==null)
+			{
+				System.out.println("no existe ningun repositorio con ese nombre");
+			}
+			else
+				{
+				if((local==null)||(remote.getFechaModif().getTime()>=local.getFechaModif().getTime()))
 			{
 				getRepositoriosLocalesConfirmados().add(remote);
-				repositoriosSerializados.put(repositorio, repositorio); // el segundo es la ruta
+				repositoriosSerializados.put(repositorio, "BDCliente\\"+repositorio); // el segundo es la ruta
 			}
+				}
 			oos.writeObject(remote);
 			ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
 			elMap.writeObject(repositoriosSerializados);

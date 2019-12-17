@@ -19,7 +19,7 @@ import Respositorios.Repositorio;
 public class AtenderPeticion implements Runnable {
 
 	private static List<Repositorio> repositorios = new ArrayList<Repositorio>();
-	private boolean autentificado=false;
+	private boolean autentificado=true;
 	private Socket S;
 	public AtenderPeticion(Socket S,List<Repositorio> repositorios )
 	{

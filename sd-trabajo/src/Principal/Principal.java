@@ -1,5 +1,6 @@
 package Principal;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import Cliente.Cliente;
@@ -10,21 +11,26 @@ public class Principal {
 		Cliente.init();
 		@SuppressWarnings("resource")
 		Scanner sc=new Scanner(System.in);
-		int opcion;
+		int opcion = 0;
 		while(true)
 		{
-			System.out.print("Usuario: ");
+			/*System.out.print("Usuario: ");
 			String user=sc.nextLine();
 			System.out.print("Contraseña: ");
 			String pass=sc.nextLine();
-			Cliente.autentificarse(user,pass);
+			Cliente.autentificarse(user,pass);*/
 			System.out.println("1)CLONE");
 			System.out.println("2)PUSH");
 			System.out.println("3)PULL");
 			System.out.println("4)REMOVE");
 			System.out.println("5)CREATE/ADD");
 			System.out.println("6)LISTAR");
-			opcion=sc.nextInt();
+			try{opcion=sc.nextInt();}
+			catch(InputMismatchException e)
+			{
+				System.out.println("Opcion incorrecta");
+				return;
+			}
 			switch(opcion)
 			{
 			case 1:
@@ -59,8 +65,7 @@ public class Principal {
 				break;
 			case 6:
 				Cliente.listar();
-				default:
-					break;
+				break;
 			}
 		}
 
