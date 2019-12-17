@@ -21,7 +21,7 @@ public class Cliente {
 	private static String RUTA_DEL_MAP = "BDCliente\\base_de_datos_cliente";
 	private static Map<String, String> repositoriosSerializados = new HashMap<>(); 
 	private static List<Repositorio> repositoriosLocalesConfirmados = new ArrayList<Repositorio>();
-	private static String host="localhost";
+	private static String host="10.11.61.24";
 	private static int puerto=6666;
 	
 	@SuppressWarnings("unchecked")
@@ -71,10 +71,10 @@ public class Cliente {
 			else{
 			out.write("CLONE " + repositorio +"\r\n");
 			out.flush();
-			FileOutputStream f=new FileOutputStream("BDCliente\\"+repositorio);
-			ObjectOutputStream oos=new ObjectOutputStream(f);
+
 			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
 			Repositorio repo=(Repositorio) ois.readObject();
+
 			if(repo==null)
 			{
 				System.out.println("No existe ese repositorio");
@@ -82,14 +82,16 @@ public class Cliente {
 			}
 			else 
 			{
+				FileOutputStream f=new FileOutputStream("BDCliente\\"+repositorio);
+				ObjectOutputStream oos=new ObjectOutputStream(f);
 				repo.setNombre(repo.getNombre());
 				repositoriosLocalesConfirmados.add(repo);
 				oos.writeObject(repo);
 				repositoriosSerializados.put(repositorio, "BDCliente\\"+repositorio); //el segundo es la ruta
+				oos.flush();
+				oos.close();
 			}
-			oos.flush();
 			ois.close();
-			oos.close();
 			ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
 			elMap.writeObject(repositoriosSerializados);
 			elMap.close();
@@ -165,7 +167,6 @@ public class Cliente {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Map<String, String> repositoriosSerializadosprueba = repositoriosSerializados;
 		ObjectOutputStream elMap = null;
 		try {
 			elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
@@ -190,7 +191,7 @@ public class Cliente {
 	{
 		try (Socket s = new Socket(host, puerto);
 				InputStreamReader in = new InputStreamReader(s.getInputStream());
-				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
+				OutputStreamWriter out = new OutputStreamWriter(s.getOutputStream());)
 		{
 			out.write("PUSH " + repositorio + "\r\n");
 			out.flush();
@@ -293,18 +294,4 @@ public class Cliente {
 			System.out.println(repositoriosLocalesConfirmados.get(i).getNombre());
 		}
 	}
-	public static void autentificarse(String user,String pass) {
-		try (Socket s = new Socket(host, puerto);
-				InputStreamReader in = new InputStreamReader(s.getInputStream());
-				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
-		{
-			out.write("LOGIN "+user+" PASSWORD "+pass+"\r\n");
-			out.flush();
-			s.shutdownOutput();
-		} catch(IOException e) {
-			
-		}
-		
-	}
-
 }

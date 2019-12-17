@@ -1,6 +1,5 @@
 package Server;
 
-import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,16 +9,13 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import Cliente.Cliente;
 import Respositorios.Repositorio;
 
 public class AtenderPeticion implements Runnable {
 
 	private static List<Repositorio> repositorios = new ArrayList<Repositorio>();
-	private boolean autentificado=true;
 	private Socket S;
 	public AtenderPeticion(Socket S,List<Repositorio> repositorios )
 	{
@@ -29,11 +25,18 @@ public class AtenderPeticion implements Runnable {
 	
 	@Override
 	public void run() {
-		try (BufferedReader in = new BufferedReader(new InputStreamReader(S.getInputStream()));
+		try (InputStreamReader in = new InputStreamReader(S.getInputStream());
 				OutputStreamWriter out = new OutputStreamWriter(S.getOutputStream());)
 		{
 			
-			String request = in.readLine();
+			char c;
+			String request;
+			StringBuilder r = new StringBuilder();
+			while((c = (char) in.read()) != '\r') {
+				r.append(c);
+			}
+			
+			request = r.toString();
 
 			String[] request_array = request.split(" ");
 			if ((!request_array[0].equals("CLONE") 
@@ -46,25 +49,20 @@ public class AtenderPeticion implements Runnable {
 				out.flush();
 				throw new IllegalArgumentException("Formato de comando incorrecto");
 			}
-
-			if(autentificado)
-			{
+			
 				if(request_array[0].equals("LOGIN"))
 				{
 					if(Server.usuariosServer.containsKey(request_array[1]))
 					{
 						if(Server.usuariosServer.get(request_array[1]).equals(request_array[3]))
 						{
-							autentificado=true;
 						}
 						else
 						{
-							autentificado=false;
 						}
 					}
 					else
 					{
-						autentificado=false;
 					}
 				}
 				boolean noExiste=true;
@@ -90,19 +88,6 @@ public class AtenderPeticion implements Runnable {
 							System.out.println(repositorios.get(i).getNombre());
 						}
 						out.write( request_array[1]+ " ha sido creado\r\n");
-						FileOutputStream f = null;
-						f = new FileOutputStream(repo.getNombre());
-						ObjectOutputStream oos = new ObjectOutputStream(f);
-						oos.writeObject(repo);
-						Server.repositoriosSerializadosServer.put(repo.getNombre(), "BDServer\\"+repo.getNombre());
-						synchronized(Server.RUTA_DE_LA_BD_SERVER) {
-							ObjectOutputStream elMap =new ObjectOutputStream(new FileOutputStream(Server.RUTA_DE_LA_BD_SERVER));
-							elMap.writeObject(Server.repositoriosSerializadosServer);
-							Server.leerBD();
-							out.flush();
-							oos.close();
-						}
-
 					}
 				}
 				if ((request_array[0].equals("CLONE")))
@@ -145,7 +130,7 @@ public class AtenderPeticion implements Runnable {
 				if((request_array[0].equals("PUSH")))
 				{
 					
-					FileOutputStream f=new FileOutputStream("prueba");
+					FileOutputStream f=new FileOutputStream("BDServer\\"+request_array[1]);
 					ObjectOutputStream oos=new ObjectOutputStream(f);
 					ObjectInputStream ois=new ObjectInputStream(S.getInputStream());
 					Repositorio repo = null;
@@ -158,22 +143,23 @@ public class AtenderPeticion implements Runnable {
 					repositorios.add(repo);
 					oos.writeObject(repo);
 					oos.flush();
-					ois.close();
 					try {
 						oos.close();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					Server.repositoriosSerializadosServer.put(repo.getNombre(), "BDServer\\"+repo.getNombre());
+					synchronized(Server.RUTA_DE_LA_BD_SERVER) {
+						ObjectOutputStream elMap =new ObjectOutputStream(new FileOutputStream(Server.RUTA_DE_LA_BD_SERVER));
+						elMap.writeObject(Server.repositoriosSerializadosServer);
+						Server.leerBD();
+						out.flush();
+						elMap.close();
+					}
 				}
 				Server.leerBD();
 
-		} 
-			
-			else 
-			{
-				return;
-			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
