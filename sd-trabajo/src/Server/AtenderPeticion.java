@@ -17,7 +17,7 @@ public class AtenderPeticion implements Runnable {
 
 	private static List<Repositorio> repositorios = new ArrayList<Repositorio>();
 	private Socket S;
-	public AtenderPeticion(Socket S,List<Repositorio> repositorios )
+	public AtenderPeticion(Socket S, List<Repositorio> repositorios )
 	{
 		this.S=S;
 		AtenderPeticion.repositorios=repositorios;
@@ -26,8 +26,9 @@ public class AtenderPeticion implements Runnable {
 	@Override
 	public void run() {
 		try (InputStreamReader in = new InputStreamReader(S.getInputStream());
-				OutputStreamWriter out = new OutputStreamWriter(S.getOutputStream());)
+			 OutputStreamWriter out = new OutputStreamWriter(S.getOutputStream());)
 		{
+			
 			
 			char c;
 			String request;
@@ -49,22 +50,6 @@ public class AtenderPeticion implements Runnable {
 				out.flush();
 				throw new IllegalArgumentException("Formato de comando incorrecto");
 			}
-			
-				if(request_array[0].equals("LOGIN"))
-				{
-					if(Server.usuariosServer.containsKey(request_array[1]))
-					{
-						if(Server.usuariosServer.get(request_array[1]).equals(request_array[3]))
-						{
-						}
-						else
-						{
-						}
-					}
-					else
-					{
-					}
-				}
 				boolean noExiste=true;
 				if ((request_array[0].equals("ADD")))
 				{
@@ -83,10 +68,15 @@ public class AtenderPeticion implements Runnable {
 					{
 						Repositorio repo=new Repositorio(request_array[1]);
 						repositorios.add(repo);
-						for(int i=0; i<repositorios.size();i++)
-						{
-							System.out.println(repositorios.get(i).getNombre());
-						}
+						ObjectOutputStream oos=new ObjectOutputStream(new FileOutputStream("BDServer\\"+repo.getNombre()));
+						oos.writeObject(repo);
+						oos.flush();
+						oos.close();
+						Server.repositoriosSerializadosServer.put(repo.getNombre(), "BDServer\\"+repo.getNombre());
+						ObjectOutputStream elMap =new ObjectOutputStream(new FileOutputStream(Server.RUTA_DE_LA_BD_SERVER));
+						elMap.writeObject(Server.repositoriosSerializadosServer);
+						elMap.flush();
+						elMap.close();
 						out.write( request_array[1]+ " ha sido creado\r\n");
 					}
 				}
@@ -129,7 +119,6 @@ public class AtenderPeticion implements Runnable {
 				}
 				if((request_array[0].equals("PUSH")))
 				{
-					
 					FileOutputStream f=new FileOutputStream("BDServer\\"+request_array[1]);
 					ObjectOutputStream oos=new ObjectOutputStream(f);
 					ObjectInputStream ois=new ObjectInputStream(S.getInputStream());
@@ -155,6 +144,7 @@ public class AtenderPeticion implements Runnable {
 						elMap.writeObject(Server.repositoriosSerializadosServer);
 						Server.leerBD();
 						out.flush();
+						elMap.flush();
 						elMap.close();
 					}
 				}

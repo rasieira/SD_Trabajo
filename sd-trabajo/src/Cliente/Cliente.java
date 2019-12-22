@@ -21,7 +21,7 @@ public class Cliente {
 	private static String RUTA_DEL_MAP = "BDCliente\\base_de_datos_cliente";
 	private static Map<String, String> repositoriosSerializados = new HashMap<>(); 
 	private static List<Repositorio> repositoriosLocalesConfirmados = new ArrayList<Repositorio>();
-	private static String host="10.11.61.24";
+	private static String host="localhost";
 	private static int puerto=6666;
 	
 	@SuppressWarnings("unchecked")
@@ -190,7 +190,6 @@ public class Cliente {
 	public static void push(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
-				InputStreamReader in = new InputStreamReader(s.getInputStream());
 				OutputStreamWriter out = new OutputStreamWriter(s.getOutputStream());)
 		{
 			out.write("PUSH " + repositorio + "\r\n");
@@ -208,6 +207,8 @@ public class Cliente {
 			oos.writeObject(repo);
 			oos.flush();
 			out.flush();
+
+
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -20,9 +20,7 @@ import Respositorios.Repositorio;
 
 public class Server {
 	public static String RUTA_DE_LA_BD_SERVER = "BDServer\\base_de_datos_server";
-	public static String RUTA_DE_LOS_USUSARIOS_SERVER = "BDServer\\base_de_datos_usuarios_server";
 	public static Map<String, String> repositoriosSerializadosServer = new HashMap<>();
-	public static Map<String, String> usuariosServer = new HashMap<>();
 	public static List<Repositorio> repositoriosLocalesServer = new ArrayList<Repositorio>();
 	@SuppressWarnings("unchecked")
 	public static void leerBD()
@@ -123,34 +121,9 @@ public class Server {
 		}
 		
 	}
-	public static void crearUsuariosPrueba()
-	{
-		String usuario1="usuario1";
-		String usuario2="usuario2";
-		String password1="root1";
-		String password2="root2";
-		usuariosServer.put(usuario1, password1);
-		usuariosServer.put(usuario2, password2);
-		
-		ObjectOutputStream elMap = null;
-		try {
-			elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DE_LOS_USUSARIOS_SERVER));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			elMap.writeObject(usuariosServer);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
 	public static void main(String[] args) throws FileNotFoundException, IOException
 	{
 		Server.crearRepositoriosPrueba();
-		Server.crearUsuariosPrueba();
 		Server.leerBD();
 		ExecutorService pool = Executors.newCachedThreadPool();
 
