@@ -1,5 +1,6 @@
 package Server;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -239,6 +240,9 @@ public class AtenderPeticion implements Runnable {
 				aux = true;
 			}
 		}
+		Server.repositoriosSerializadosServer.remove(repositorio);
+		File archivoBorrar = new File("BDServer\\" + repositorio);
+		archivoBorrar.delete();
 		if (aux) {
 			List<Repositorio> nombrados = repositorios.stream().filter(n -> n.getNombre().equals(repositorio))
 					.collect(Collectors.toList());

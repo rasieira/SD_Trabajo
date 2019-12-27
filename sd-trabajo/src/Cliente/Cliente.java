@@ -58,9 +58,9 @@ public class Cliente {
 
 	public static void clonar(String repositorio) {
 		try (Socket s = new Socket(host, puerto);
-				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
-				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());) {
-			Paquete envio = new Paquete("CLONE " + repositorio + "\r\n");
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
+			Paquete envio = new Paquete("CLONE " + repositorio + " \r\n");
 			if (estaEnLocal(repositorio)) {
 				System.out.println("Ya esta en Local");
 			} else {
@@ -79,6 +79,7 @@ public class Cliente {
 					repositoriosLocalesConfirmados.add(repo);
 					oos1.writeObject(repo);
 					repositoriosSerializados.put(repositorio, "BDCliente\\" + repositorio); // el segundo es la ruta
+					System.out.println(mensajerecibido);
 					oos1.flush();
 					oos1.close();
 				}
@@ -102,13 +103,12 @@ public class Cliente {
 
 	public static void anadir(String repositorio) {
 		try (Socket s = new Socket(host, puerto);
-				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
-				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());) {
-			Paquete envio = new Paquete("ADD " + repositorio + "\r\n");
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
+			Paquete envio = new Paquete("ADD " + repositorio + " \r\n");
 			oos.writeObject(envio);
 			oos.flush();
-			clonar(repositorio);
-			Paquete recibido = null;
+			Paquete recibido=null;
 			try {
 				recibido = (Paquete) ois.readObject();
 			} catch (ClassNotFoundException e) {
@@ -129,9 +129,10 @@ public class Cliente {
 
 	public static void eliminar(String repositorio) {
 		try (Socket s = new Socket(host, puerto);
-				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
-				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());) {
-			Paquete envio = new Paquete("REMOVE " + repositorio + "\r\n");
+
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
+			Paquete envio = new Paquete("REMOVE " + repositorio + " \r\n");
 			oos.writeObject(envio);
 			oos.flush();
 			for (int i = 0; i < repositoriosLocalesConfirmados.size(); i++) {
@@ -182,8 +183,8 @@ public class Cliente {
 
 	public static void push(String repositorio) {
 		try (Socket s = new Socket(host, puerto);
-				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
-				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());) {
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
 			Repositorio repo = null;
 			for (int i = 0; i < getRepositoriosLocalesConfirmados().size(); i++) {
 				if (getRepositoriosLocalesConfirmados().get(i).getNombre().equals(repositorio)) {
@@ -191,7 +192,7 @@ public class Cliente {
 				}
 			}
 			repo.setVersion(repo.getVersion() + 1.0);
-			Paquete envio = new Paquete("PUSH " + repositorio + "\r\n", repo);
+			Paquete envio = new Paquete("PUSH " + repositorio + " \r\n", repo);
 			oos.writeObject(envio);
 			oos.flush();
 			Paquete recibido = null;
@@ -214,9 +215,10 @@ public class Cliente {
 
 	public static void pull(String repositorio) {
 		try (Socket s = new Socket(host, puerto);
-				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
-				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());) {
-			Paquete envio = new Paquete("CLONE " + repositorio + "\r\n");
+
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
+			Paquete envio = new Paquete("CLONE " + repositorio + " \r\n");
 			oos.writeObject(envio);
 			oos.flush();
 			FileOutputStream f = new FileOutputStream("BDCliente\\" + repositorio);

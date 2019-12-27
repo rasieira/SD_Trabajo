@@ -1,9 +1,15 @@
 package Paquete;
 
+import java.io.Serializable;
+
 import Respositorios.Repositorio;
 
-public class Paquete {
+public class Paquete implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String comando;
 	private Repositorio repositorio;
 
