@@ -56,7 +56,7 @@ public class Principal {
 				System.out.println("Introduce el nombre del Repositorio que quieres crear");
 				Scanner sc21111=new Scanner(System.in);
 				String nombreRepo1111=sc21111.nextLine();
-				Cliente.añadir(nombreRepo1111);
+				Cliente.anadir(nombreRepo1111);
 				break;
 			case 6:
 				Cliente.listar();

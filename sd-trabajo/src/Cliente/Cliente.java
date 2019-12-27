@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import Paquete.Paquete;
 import Respositorios.Repositorio;
 
 public class Cliente {
@@ -109,7 +110,7 @@ public class Cliente {
 		}
 		
 	}
-	public static void añadir(String repositorio)
+	public static void anadir(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
 				InputStreamReader in = new InputStreamReader(s.getInputStream());
@@ -189,11 +190,8 @@ public class Cliente {
 	}
 	public static void push(String repositorio)
 	{
-		try (Socket s = new Socket(host, puerto);
-				OutputStreamWriter out = new OutputStreamWriter(s.getOutputStream());)
+		try (Socket s = new Socket(host, puerto);)
 		{
-			out.write("PUSH " + repositorio + "\r\n");
-			out.flush();
 			Repositorio repo=null;
 			for(int i=0;i<getRepositoriosLocalesConfirmados().size();i++)
 			{
@@ -202,13 +200,11 @@ public class Cliente {
 					repo=getRepositoriosLocalesConfirmados().get(i);
 				}
 			}
-			repo.setVersion(repo.getVersion()+0.1);
+			repo.setVersion(repo.getVersion()+1.0);
+			Paquete comandoPush=new Paquete("PUSH " + repositorio + "\r\n",repo);
 			ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());
-			oos.writeObject(repo);
+			oos.writeObject(comandoPush);
 			oos.flush();
-			out.flush();
-
-
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

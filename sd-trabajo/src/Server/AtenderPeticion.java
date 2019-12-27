@@ -1,16 +1,16 @@
 package Server;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import Paquete.Paquete;
 import Respositorios.Repositorio;
 
 public class AtenderPeticion implements Runnable {
@@ -25,135 +25,247 @@ public class AtenderPeticion implements Runnable {
 	
 	@Override
 	public void run() {
-		try (InputStreamReader in = new InputStreamReader(S.getInputStream());
-			 OutputStreamWriter out = new OutputStreamWriter(S.getOutputStream());)
+		try (ObjectInputStream ois=new ObjectInputStream(S.getInputStream());
+				ObjectOutputStream oos=new ObjectOutputStream(S.getOutputStream());)
 		{
-			
-			
-			char c;
-			String request;
-			StringBuilder r = new StringBuilder();
-			while((c = (char) in.read()) != '\r') {
-				r.append(c);
+			Paquete paquete = null;
+			try {
+				paquete = (Paquete) ois.readObject();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			String request=paquete.getComando();
 			
-			request = r.toString();
 
 			String[] request_array = request.split(" ");
-			if ((!request_array[0].equals("CLONE") 
-							&& !request_array[0].equals("ADD")
-							&& !request_array[0].equals("PUSH")
-							&& !request_array[0].equals("REMOVE")
-							&& !request_array[0].equals("LOGIN")))
+			String opcion=request_array[0];
+			Paquete devuelto=null;
+			switch(opcion)
 			{
-				out.write("ERROR\r\n");
-				out.flush();
-				throw new IllegalArgumentException("Formato de comando incorrecto");
+				case "CLONE":
+					devuelto=AtenderPeticion.clone(request_array[1]);
+					break;
+				case "ADD":
+						Repositorio repo=paquete.getRepositorio();
+						if(repo!=null)
+						{
+							devuelto=AtenderPeticion.anadir(repo);							
+						}
+						else {
+							devuelto=new Paquete("Error\r\n");
+						}
+						break;
+				case "REMOVE":
+					devuelto=AtenderPeticion.remove(request_array[1]);
+					break;
+				case "PUSH":
+						Repositorio repo1=paquete.getRepositorio();
+						if(repo1!=null)
+						{
+							devuelto=AtenderPeticion.push(repo1);
+						}
+						else {
+							devuelto=new Paquete("Error\r\n");
+						}
+						break;
+				case "PULL":
+					devuelto=AtenderPeticion.pull(request_array[1]);
+					break;
+				default:
+					devuelto=new Paquete("Error\r\n");
+					break;
 			}
-				boolean noExiste=true;
-				if ((request_array[0].equals("ADD")))
-				{
-					for(int i=0;i<repositorios.size();i++)
-					{
-						if(repositorios.get(i).getNombre().equals(request_array[1]))
-						{
-							noExiste=false;
-							out.write("Ya existe un repositorio con ese nombre\r\n");
-							out.flush();
-							break;
-						}
-					}
-					
-				if(noExiste)
-					{
-						Repositorio repo=new Repositorio(request_array[1]);
-						repositorios.add(repo);
-						ObjectOutputStream oos=new ObjectOutputStream(new FileOutputStream("BDServer\\"+repo.getNombre()));
-						oos.writeObject(repo);
-						oos.flush();
-						oos.close();
-						Server.repositoriosSerializadosServer.put(repo.getNombre(), "BDServer\\"+repo.getNombre());
-						ObjectOutputStream elMap =new ObjectOutputStream(new FileOutputStream(Server.RUTA_DE_LA_BD_SERVER));
-						elMap.writeObject(Server.repositoriosSerializadosServer);
-						elMap.flush();
-						elMap.close();
-						out.write( request_array[1]+ " ha sido creado\r\n");
-					}
-				}
-				if ((request_array[0].equals("CLONE")))
-				{
-						Repositorio repo=null;
-						for(int i=0;i<repositorios.size();i++)
-						{
-							if(repositorios.get(i).getNombre().equals(request_array[1]))
-							{
-								repo=repositorios.get(i);
-							}
-						}
-						ObjectOutputStream oos=new ObjectOutputStream(S.getOutputStream());
-						oos.writeObject(repo);
-						oos.flush();
-						out.flush();
-				}
-				if ((request_array[0].equals("REMOVE")))
-				{
-					boolean aux=false;
-					for(int i=0;i<repositorios.size();i++)
-					{
-						if(repositorios.get(i).getNombre().equals(request_array[1])&&(!aux))
-						{
-							aux=true;
-						}
-					}
-					if (aux)
-					{
-						List<Repositorio> nombrados = repositorios.stream().filter(n -> n.getNombre().equals(request_array[1])).collect(Collectors.toList());
-						repositorios.removeAll(nombrados);
-						out.flush();
-					} else
-					{
-						out.write(request_array[1]+"no existe\r\n");
-						out.flush();
-					}
-		
-				}
-				if((request_array[0].equals("PUSH")))
-				{
-					FileOutputStream f=new FileOutputStream("BDServer\\"+request_array[1]);
-					ObjectOutputStream oos=new ObjectOutputStream(f);
-					ObjectInputStream ois=new ObjectInputStream(S.getInputStream());
-					Repositorio repo = null;
-					try {
-						repo = (Repositorio) ois.readObject();
-					} catch (ClassNotFoundException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					repositorios.add(repo);
-					oos.writeObject(repo);
-					oos.flush();
-					try {
-						oos.close();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					Server.repositoriosSerializadosServer.put(repo.getNombre(), "BDServer\\"+repo.getNombre());
-					synchronized(Server.RUTA_DE_LA_BD_SERVER) {
-						ObjectOutputStream elMap =new ObjectOutputStream(new FileOutputStream(Server.RUTA_DE_LA_BD_SERVER));
-						elMap.writeObject(Server.repositoriosSerializadosServer);
-						Server.leerBD();
-						out.flush();
-						elMap.flush();
-						elMap.close();
-					}
-				}
-				Server.leerBD();
-
-		} catch (IOException e1) {
+			oos.writeObject(devuelto);
+			oos.flush();
+		Server.leerBD();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
+	}
+	public static Paquete clone(String repositorio)
+	{
+		Repositorio repo=null;
+		Paquete devuelto=null;
+		for(int i=0;i<repositorios.size();i++)
+		{
+			if(repositorios.get(i).getNombre().equals(repositorio))
+			{
+				repo=repositorios.get(i);
+			}
+		}
+		if(repo!=null)
+		{
+			devuelto=new Paquete("Repositorio clonado",repo);
+		}
+		else
+		{
+			devuelto=new Paquete("Error\r\n");
+		}
+		
+		return devuelto;
+	}
+	public static  Paquete push(Repositorio repositorio)
+	{
+		repositorios.add(repositorio);
+		FileOutputStream f = null;
+		try {
+			f = new FileOutputStream("BDServer\\"+repositorio.getNombre());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ObjectOutputStream oos = null;
+		try {
+			oos = new ObjectOutputStream(f);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			oos.writeObject(repositorio);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			oos.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Server.repositoriosSerializadosServer.put(repositorio.getNombre(), "BDServer\\"+repositorio.getNombre());
+		synchronized(Server.RUTA_DE_LA_BD_SERVER) {
+			ObjectOutputStream elMap = null;
+			try {
+				elMap = new ObjectOutputStream(new FileOutputStream(Server.RUTA_DE_LA_BD_SERVER));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				elMap.writeObject(Server.repositoriosSerializadosServer);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			Server.leerBD();
+			try {
+				elMap.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				elMap.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		Paquete devuelto=new Paquete(repositorio.getNombre()+"ha sido eliminado\r\n");
+		return devuelto;
+		
+	}
+	public static Paquete anadir(Repositorio repositorio)
+	{
+		boolean noExiste=true;
+		Paquete devuelto=null;
+		for(int i=0;i<repositorios.size();i++)
+		{
+			if(repositorios.get(i).getNombre().equals(repositorio.getNombre()))
+			{
+				noExiste=false;
+				devuelto=new Paquete("Ya existe un repositorio con ese nombre\r\n");
+				break;
+			}
+		}
+		
+	if(noExiste)
+		{
+			Repositorio repo=new Repositorio(repositorio.getNombre());
+			repositorios.add(repo);
+			ObjectOutputStream oos = null;
+			try {
+				oos = new ObjectOutputStream(new FileOutputStream("BDServer\\"+repo.getNombre()));
+			} catch (IOException e4) {
+				// TODO Auto-generated catch block
+				e4.printStackTrace();
+			}
+			try {
+				oos.writeObject(repo);
+			} catch (IOException e4) {
+				// TODO Auto-generated catch block
+				e4.printStackTrace();
+			}
+			try {
+				oos.flush();
+			} catch (IOException e4) {
+				// TODO Auto-generated catch block
+				e4.printStackTrace();
+			}
+			try {
+				oos.close();
+			} catch (IOException e4) {
+				// TODO Auto-generated catch block
+				e4.printStackTrace();
+			}
+			Server.repositoriosSerializadosServer.put(repo.getNombre(), "BDServer\\"+repo.getNombre());
+			ObjectOutputStream elMap = null;
+			try {
+				elMap = new ObjectOutputStream(new FileOutputStream(Server.RUTA_DE_LA_BD_SERVER));
+			} catch (IOException e3) {
+				// TODO Auto-generated catch block
+				e3.printStackTrace();
+			}
+			try {
+				elMap.writeObject(Server.repositoriosSerializadosServer);
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+			try {
+				elMap.flush();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			try {
+				elMap.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			devuelto=new Paquete(repositorio.getNombre()+"ha sido creado\r\n");
+		}
+		return devuelto;
+	}
+	public static Paquete pull(String repositorio)
+	{
+		return null;
+	}
+	public static Paquete remove(String repositorio)
+	{
+		boolean aux=false;
+		Paquete devuelto=null;
+		for(int i=0;i<repositorios.size();i++)
+		{
+			if(repositorios.get(i).getNombre().equals(repositorio)&&(!aux))
+			{
+				aux=true;
+			}
+		}
+		if (aux)
+		{
+			List<Repositorio> nombrados = repositorios.stream().filter(n -> n.getNombre().equals(repositorio)).collect(Collectors.toList());
+			repositorios.removeAll(nombrados);
+			devuelto=new Paquete(repositorio+"ha sido eliminado\r\n");
+		} else
+		{
+			devuelto=new Paquete(repositorio+"no existe\r\n");
+		}
+		return devuelto;	
 	}
 }
 
