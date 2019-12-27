@@ -1,4 +1,5 @@
 package Cliente;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,81 +18,75 @@ import Respositorios.Repositorio;
 
 public class Cliente {
 	private static String RUTA_DEL_MAP = "BDCliente\\base_de_datos_cliente";
-	private static Map<String, String> repositoriosSerializados = new HashMap<>(); 
+	private static Map<String, String> repositoriosSerializados = new HashMap<>();
 	private static List<Repositorio> repositoriosLocalesConfirmados = new ArrayList<Repositorio>();
-	private static String host="localhost";
-	private static int puerto=6666;
-	
+	private static String host = "localhost";
+	private static int puerto = 6666;
+
 	@SuppressWarnings("unchecked")
 	public static void init() {
 		File directorio = new File("BDCliente\\");
 		directorio.mkdir();
-		if(!new File(RUTA_DEL_MAP).exists())
+		if (!new File(RUTA_DEL_MAP).exists())
 			return;
-		try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(RUTA_DEL_MAP))) {
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(RUTA_DEL_MAP))) {
 			Object leido = ois.readObject();
-			if(leido instanceof Map<?,?>) {
-				repositoriosSerializados = (Map<String,String>) leido;
+			if (leido instanceof Map<?, ?>) {
+				repositoriosSerializados = (Map<String, String>) leido;
 			}
-		} catch(IOException|ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		for(String nombreRepositorio : repositoriosSerializados.keySet())
-		{
+		for (String nombreRepositorio : repositoriosSerializados.keySet()) {
 			Repositorio r = null;
-			try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(repositoriosSerializados.get(nombreRepositorio)))) {
+			try (ObjectInputStream ois = new ObjectInputStream(
+					new FileInputStream(repositoriosSerializados.get(nombreRepositorio)))) {
 				r = (Repositorio) ois.readObject();
-			} catch (IOException|ClassNotFoundException e) {
+			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
-			
-			if(r!=null)
+
+			if (r != null)
 				repositoriosLocalesConfirmados.add(r);
 		}
 	}
-	public Cliente(String host,int puerto)
-	{
-		Cliente.puerto=puerto;
-		Cliente.host=host;
-	}
-	public static void clonar(String repositorio)
-	{
-		try (Socket s = new Socket(host, puerto);
-				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
-				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());)
-		{
-			Paquete envio=new Paquete("CLONE " + repositorio +"\r\n");
-			if(estaEnLocal(repositorio))
-			{
-				System.out.println("Ya esta en Local");
-			}
-			else{
-			oos.writeObject(envio);
-			oos.flush();
-			Paquete recibido=(Paquete) ois.readObject();
 
-			String mensajerecibido=recibido.getComando();
-			Repositorio repo=recibido.getRepositorio();
-			if(repo==null)
-			{
-				System.out.println(mensajerecibido);
+	public Cliente(String host, int puerto) {
+		Cliente.puerto = puerto;
+		Cliente.host = host;
+	}
+
+	public static void clonar(String repositorio) {
+		try (Socket s = new Socket(host, puerto);
+				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());) {
+			Paquete envio = new Paquete("CLONE " + repositorio + "\r\n");
+			if (estaEnLocal(repositorio)) {
+				System.out.println("Ya esta en Local");
+			} else {
+				oos.writeObject(envio);
+				oos.flush();
+				Paquete recibido = (Paquete) ois.readObject();
+
+				String mensajerecibido = recibido.getComando();
+				Repositorio repo = recibido.getRepositorio();
+				if (repo == null) {
+					System.out.println(mensajerecibido);
+				} else {
+					FileOutputStream f = new FileOutputStream("BDCliente\\" + repositorio);
+					ObjectOutputStream oos1 = new ObjectOutputStream(f);
+					repo.setNombre(repo.getNombre());
+					repositoriosLocalesConfirmados.add(repo);
+					oos1.writeObject(repo);
+					repositoriosSerializados.put(repositorio, "BDCliente\\" + repositorio); // el segundo es la ruta
+					oos1.flush();
+					oos1.close();
+				}
+				ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
+				elMap.writeObject(repositoriosSerializados);
+				elMap.close();
 			}
-			else 
-			{
-				FileOutputStream f=new FileOutputStream("BDCliente\\"+repositorio);
-				ObjectOutputStream oos1=new ObjectOutputStream(f);
-				repo.setNombre(repo.getNombre());
-				repositoriosLocalesConfirmados.add(repo);
-				oos1.writeObject(repo);
-				repositoriosSerializados.put(repositorio, "BDCliente\\"+repositorio); //el segundo es la ruta
-				oos1.flush();
-				oos1.close();
-			}
-			ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
-			elMap.writeObject(repositoriosSerializados);
-			elMap.close();
-			}
-			
+
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -102,15 +97,14 @@ public class Cliente {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	public static void anadir(String repositorio)
-	{
+
+	public static void anadir(String repositorio) {
 		try (Socket s = new Socket(host, puerto);
-				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
-				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());)
-		{
-			Paquete envio=new Paquete("ADD " +repositorio+ "\r\n");
+				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());) {
+			Paquete envio = new Paquete("ADD " + repositorio + "\r\n");
 			oos.writeObject(envio);
 			oos.flush();
 			clonar(repositorio);
@@ -121,7 +115,7 @@ public class Cliente {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			String mensajerecibido=recibido.getComando();
+			String mensajerecibido = recibido.getComando();
 			System.out.println(mensajerecibido);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -132,21 +126,18 @@ public class Cliente {
 		}
 
 	}
-	public static void eliminar(String repositorio)
-	{
+
+	public static void eliminar(String repositorio) {
 		try (Socket s = new Socket(host, puerto);
-				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
-				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());)
-		{
-			Paquete envio=new Paquete("REMOVE " + repositorio+"\r\n");
+				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());) {
+			Paquete envio = new Paquete("REMOVE " + repositorio + "\r\n");
 			oos.writeObject(envio);
 			oos.flush();
-			for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
-			{
-				if(repositoriosLocalesConfirmados.get(i).getNombre().equals(repositorio))
-				{
+			for (int i = 0; i < repositoriosLocalesConfirmados.size(); i++) {
+				if (repositoriosLocalesConfirmados.get(i).getNombre().equals(repositorio)) {
 					repositoriosLocalesConfirmados.remove(i);
-					File archivoBorrar=new File("BDCliente\\"+repositorio);
+					File archivoBorrar = new File("BDCliente\\" + repositorio);
 					archivoBorrar.delete();
 				}
 			}
@@ -158,9 +149,9 @@ public class Cliente {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			String mensajerecibido=recibido.getComando();
+			String mensajerecibido = recibido.getComando();
 			System.out.println(mensajerecibido);
-			
+
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -188,22 +179,19 @@ public class Cliente {
 			e.printStackTrace();
 		}
 	}
-	public static void push(String repositorio)
-	{
+
+	public static void push(String repositorio) {
 		try (Socket s = new Socket(host, puerto);
-				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
-				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());)
-		{
-			Repositorio repo=null;
-			for(int i=0;i<getRepositoriosLocalesConfirmados().size();i++)
-			{
-				if(getRepositoriosLocalesConfirmados().get(i).getNombre().equals(repositorio))
-				{
-					repo=getRepositoriosLocalesConfirmados().get(i);
+				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());) {
+			Repositorio repo = null;
+			for (int i = 0; i < getRepositoriosLocalesConfirmados().size(); i++) {
+				if (getRepositoriosLocalesConfirmados().get(i).getNombre().equals(repositorio)) {
+					repo = getRepositoriosLocalesConfirmados().get(i);
 				}
 			}
-			repo.setVersion(repo.getVersion()+1.0);
-			Paquete envio=new Paquete("PUSH " + repositorio + "\r\n",repo);
+			repo.setVersion(repo.getVersion() + 1.0);
+			Paquete envio = new Paquete("PUSH " + repositorio + "\r\n", repo);
 			oos.writeObject(envio);
 			oos.flush();
 			Paquete recibido = null;
@@ -213,7 +201,7 @@ public class Cliente {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			String mensajerecibido=recibido.getComando();
+			String mensajerecibido = recibido.getComando();
 			System.out.println(mensajerecibido);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -223,35 +211,31 @@ public class Cliente {
 			e.printStackTrace();
 		}
 	}
-	public static void pull(String repositorio)
-	{
+
+	public static void pull(String repositorio) {
 		try (Socket s = new Socket(host, puerto);
-				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
-				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());)
-		{
-			Paquete envio=new Paquete("CLONE " + repositorio+"\r\n");
+				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());) {
+			Paquete envio = new Paquete("CLONE " + repositorio + "\r\n");
 			oos.writeObject(envio);
 			oos.flush();
-			FileOutputStream f=new FileOutputStream("BDCliente\\"+repositorio);
-			ObjectOutputStream oos1=new ObjectOutputStream(f);
-			
-			Paquete recibido=(Paquete) ois.readObject();
-			Repositorio remote=recibido.getRepositorio();
-			Repositorio local=null;
-			for(int i=0;i<Cliente.getRepositoriosLocalesConfirmados().size();i++)
-			{
-				if(Cliente.getRepositoriosLocalesConfirmados().get(i).getNombre().equals(repositorio))
-				{
-					local=Cliente.getRepositoriosLocalesConfirmados().get(i);
+			FileOutputStream f = new FileOutputStream("BDCliente\\" + repositorio);
+			ObjectOutputStream oos1 = new ObjectOutputStream(f);
+
+			Paquete recibido = (Paquete) ois.readObject();
+			Repositorio remote = recibido.getRepositorio();
+			Repositorio local = null;
+			for (int i = 0; i < Cliente.getRepositoriosLocalesConfirmados().size(); i++) {
+				if (Cliente.getRepositoriosLocalesConfirmados().get(i).getNombre().equals(repositorio)) {
+					local = Cliente.getRepositoriosLocalesConfirmados().get(i);
 				}
 			}
 
-			if((local==null)||(remote.getFechaModif().getTime()>=local.getFechaModif().getTime()))
-			{
+			if ((local == null) || (remote.getFechaModif().getTime() >= local.getFechaModif().getTime())) {
 				getRepositoriosLocalesConfirmados().add(remote);
-				repositoriosSerializados.put(repositorio, "BDCliente\\"+repositorio); // el segundo es la ruta
+				repositoriosSerializados.put(repositorio, "BDCliente\\" + repositorio); // el segundo es la ruta
 			}
-			String mensajerecibido=recibido.getComando();
+			String mensajerecibido = recibido.getComando();
 			System.out.println(mensajerecibido);
 			oos1.writeObject(remote);
 			ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
@@ -271,28 +255,27 @@ public class Cliente {
 			e.printStackTrace();
 		}
 	}
+
 	public static List<Repositorio> getRepositoriosLocalesConfirmados() {
 		return repositoriosLocalesConfirmados;
 	}
+
 	public static void setRepositoriosLocalesConfirmados(List<Repositorio> repositoriosLocalesConfirmados) {
 		Cliente.repositoriosLocalesConfirmados = repositoriosLocalesConfirmados;
 	}
-	public static boolean estaEnLocal(String nombre)
-	{
-		boolean esta=false;
-		for(int i=0; i<getRepositoriosLocalesConfirmados().size();i++)
-		{
-			if(getRepositoriosLocalesConfirmados().get(i).getNombre().equals(nombre))
-			{
-				esta=true;
+
+	public static boolean estaEnLocal(String nombre) {
+		boolean esta = false;
+		for (int i = 0; i < getRepositoriosLocalesConfirmados().size(); i++) {
+			if (getRepositoriosLocalesConfirmados().get(i).getNombre().equals(nombre)) {
+				esta = true;
 			}
 		}
 		return esta;
 	}
-	public static void listar()
-	{
-		for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
-		{
+
+	public static void listar() {
+		for (int i = 0; i < repositoriosLocalesConfirmados.size(); i++) {
 			System.out.println(repositoriosLocalesConfirmados.get(i).getNombre());
 		}
 	}
