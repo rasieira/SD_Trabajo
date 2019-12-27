@@ -72,7 +72,6 @@ public class AtenderPeticion implements Runnable {
 			}
 			oos.writeObject(devuelto);
 			oos.flush();
-			Server.leerBD();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -90,7 +89,7 @@ public class AtenderPeticion implements Runnable {
 		if (repo != null) {
 			devuelto = new Paquete("Repositorio clonado", repo);
 		} else {
-			devuelto = new Paquete("Error\r\n");
+			devuelto = new Paquete(repositorio+" no existe\r\n");
 		}
 
 		return devuelto;
@@ -223,7 +222,7 @@ public class AtenderPeticion implements Runnable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			devuelto = new Paquete(repositorio.getNombre() + "ha sido creado\r\n");
+			devuelto = new Paquete(repositorio.getNombre() + " ha sido creado\r\n");
 		}
 		return devuelto;
 	}

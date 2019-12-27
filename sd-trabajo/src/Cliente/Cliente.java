@@ -57,13 +57,11 @@ public class Cliente {
 	}
 
 	public static void clonar(String repositorio) {
-		try (Socket s = new Socket(host, puerto);
-				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
-			Paquete envio = new Paquete("CLONE " + repositorio + " \r\n");
-			if (estaEnLocal(repositorio)) {
-				System.out.println("Ya esta en Local");
-			} else {
+		if (!estaEnLocal(repositorio)) {
+			try (Socket s = new Socket(host, puerto);
+					ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+					ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
+				Paquete envio = new Paquete("CLONE " + repositorio + " \r\n");
 				oos.writeObject(envio);
 				oos.flush();
 				Paquete recibido = (Paquete) ois.readObject();
@@ -76,7 +74,6 @@ public class Cliente {
 					FileOutputStream f = new FileOutputStream("BDCliente\\" + repositorio);
 					ObjectOutputStream oos1 = new ObjectOutputStream(f);
 					repo.setNombre(repo.getNombre());
-					repositoriosLocalesConfirmados.add(repo);
 					oos1.writeObject(repo);
 					repositoriosSerializados.put(repositorio, "BDCliente\\" + repositorio); // el segundo es la ruta
 					System.out.println(mensajerecibido);
@@ -86,29 +83,44 @@ public class Cliente {
 				ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
 				elMap.writeObject(repositoriosSerializados);
 				elMap.close();
+				repositoriosLocalesConfirmados.add(repo);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+		} else {
+			pull(repositorio);
 		}
-
 	}
 
 	public static void anadir(String repositorio) {
 		try (Socket s = new Socket(host, puerto);
 				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
-			Paquete envio = new Paquete("ADD " + repositorio + " \r\n");
+
+			Repositorio repo = new Repositorio(repositorio);
+			FileOutputStream f = new FileOutputStream("BDCliente\\" + repositorio);
+			ObjectOutputStream oos1 = new ObjectOutputStream(f);
+			oos1.writeObject(repo);
+			oos1.flush();
+			oos1.close();
+			repositoriosSerializados.put(repositorio, "BDCliente\\" + repositorio);
+			ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
+			elMap.writeObject(repositoriosSerializados);
+			elMap.flush();
+			elMap.close();
+			Paquete envio = new Paquete("ADD " + repositorio + " \r\n", repo);
 			oos.writeObject(envio);
 			oos.flush();
-			Paquete recibido=null;
+			Paquete recibido = null;
 			try {
 				recibido = (Paquete) ois.readObject();
 			} catch (ClassNotFoundException e) {
@@ -234,7 +246,6 @@ public class Cliente {
 			}
 
 			if ((local == null) || (remote.getFechaModif().getTime() >= local.getFechaModif().getTime())) {
-				getRepositoriosLocalesConfirmados().add(remote);
 				repositoriosSerializados.put(repositorio, "BDCliente\\" + repositorio); // el segundo es la ruta
 			}
 			String mensajerecibido = recibido.getComando();

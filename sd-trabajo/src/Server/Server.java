@@ -137,6 +137,7 @@ public class Server {
 		while (true) {
 			try {
 				pool.submit(new AtenderPeticion(SS.accept(), repositoriosLocalesServer));
+				Server.leerBD();
 			} catch (IOException e) {
 				e.printStackTrace();
 				break;
