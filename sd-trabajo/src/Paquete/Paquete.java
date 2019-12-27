@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import Respositorios.Repositorio;
 
-public class Paquete implements Serializable{
+public class Paquete implements Serializable {
 
 	/**
 	 * 

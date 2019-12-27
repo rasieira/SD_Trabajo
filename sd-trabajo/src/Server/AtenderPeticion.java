@@ -89,7 +89,7 @@ public class AtenderPeticion implements Runnable {
 		if (repo != null) {
 			devuelto = new Paquete("Repositorio clonado", repo);
 		} else {
-			devuelto = new Paquete(repositorio+" no existe\r\n");
+			devuelto = new Paquete(repositorio + " no existe\r\n");
 		}
 
 		return devuelto;
@@ -152,7 +152,7 @@ public class AtenderPeticion implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		Paquete devuelto = new Paquete(repositorio.getNombre() + "ha sido eliminado\r\n");
+		Paquete devuelto = new Paquete(repositorio.getNombre() + " ha sido subido\r\n");
 		return devuelto;
 
 	}
@@ -228,7 +228,7 @@ public class AtenderPeticion implements Runnable {
 	}
 
 	public static Paquete pull(String repositorio) {
-		return null;
+		return clone(repositorio);
 	}
 
 	public static Paquete remove(String repositorio) {
@@ -240,15 +240,41 @@ public class AtenderPeticion implements Runnable {
 			}
 		}
 		Server.repositoriosSerializadosServer.remove(repositorio);
-		File archivoBorrar = new File("BDServer\\" + repositorio);
-		archivoBorrar.delete();
+		ObjectOutputStream elMap = null;
+		try {
+			elMap = new ObjectOutputStream(new FileOutputStream(Server.RUTA_DE_LA_BD_SERVER));
+		} catch (IOException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
+		}
+		try {
+			elMap.writeObject(Server.repositoriosSerializadosServer);
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		try {
+			elMap.flush();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			elMap.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		if (aux) {
 			List<Repositorio> nombrados = repositorios.stream().filter(n -> n.getNombre().equals(repositorio))
 					.collect(Collectors.toList());
 			repositorios.removeAll(nombrados);
-			devuelto = new Paquete(repositorio + "ha sido eliminado\r\n");
+			File archivoBorrar = new File("BDServer\\" + repositorio);
+			archivoBorrar.delete();
+			devuelto = new Paquete(repositorio + " ha sido eliminado\r\n");
 		} else {
-			devuelto = new Paquete(repositorio + "no existe\r\n");
+			devuelto = new Paquete(repositorio + " no existe\r\n");
 		}
 		return devuelto;
 	}

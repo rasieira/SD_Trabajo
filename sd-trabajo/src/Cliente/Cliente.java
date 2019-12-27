@@ -95,7 +95,6 @@ public class Cliente {
 				e.printStackTrace();
 			}
 
-			
 		} else {
 			pull(repositorio);
 		}
@@ -147,11 +146,12 @@ public class Cliente {
 				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
 			Paquete envio = new Paquete("REMOVE " + repositorio + " \r\n");
+
 			oos.writeObject(envio);
 			oos.flush();
 			for (int i = 0; i < repositoriosLocalesConfirmados.size(); i++) {
 				if (repositoriosLocalesConfirmados.get(i).getNombre().equals(repositorio)) {
-					repositoriosLocalesConfirmados.remove(i);
+					repositoriosLocalesConfirmados.remove(repositoriosLocalesConfirmados.get(i));
 					File archivoBorrar = new File("BDCliente\\" + repositorio);
 					archivoBorrar.delete();
 				}
@@ -196,35 +196,41 @@ public class Cliente {
 	}
 
 	public static void push(String repositorio) {
-		try (Socket s = new Socket(host, puerto);
-				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
-			Repositorio repo = null;
-			for (int i = 0; i < getRepositoriosLocalesConfirmados().size(); i++) {
-				if (getRepositoriosLocalesConfirmados().get(i).getNombre().equals(repositorio)) {
-					repo = getRepositoriosLocalesConfirmados().get(i);
+		if (estaEnLocal(repositorio)) {
+			try (Socket s = new Socket(host, puerto);
+					ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+					ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
+				Repositorio repo = null;
+				for (int i = 0; i < getRepositoriosLocalesConfirmados().size(); i++) {
+					if (getRepositoriosLocalesConfirmados().get(i).getNombre().equals(repositorio)) {
+						repo = getRepositoriosLocalesConfirmados().get(i);
+					}
 				}
-			}
-			repo.setVersion(repo.getVersion() + 1.0);
-			Paquete envio = new Paquete("PUSH " + repositorio + " \r\n", repo);
-			oos.writeObject(envio);
-			oos.flush();
-			Paquete recibido = null;
-			try {
-				recibido = (Paquete) ois.readObject();
-			} catch (ClassNotFoundException e) {
+
+				repo.setVersion(repo.getVersion() + 1.0);
+				Paquete envio = new Paquete("PUSH " + repositorio + " \r\n", repo);
+				oos.writeObject(envio);
+				oos.flush();
+				Paquete recibido = null;
+				try {
+					recibido = (Paquete) ois.readObject();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				String mensajerecibido = recibido.getComando();
+				System.out.println(mensajerecibido);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			String mensajerecibido = recibido.getComando();
-			System.out.println(mensajerecibido);
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} else {
+			anadir(repositorio);
 		}
+
 	}
 
 	public static void pull(String repositorio) {
@@ -281,10 +287,14 @@ public class Cliente {
 
 	public static boolean estaEnLocal(String nombre) {
 		boolean esta = false;
-		for (int i = 0; i < getRepositoriosLocalesConfirmados().size(); i++) {
-			if (getRepositoriosLocalesConfirmados().get(i).getNombre().equals(nombre)) {
-				esta = true;
+		try {
+			for (int i = 0; i < getRepositoriosLocalesConfirmados().size(); i++) {
+				if (getRepositoriosLocalesConfirmados().get(i).getNombre().equals(nombre)) {
+					esta = true;
+				}
 			}
+		} catch (NullPointerException e) {
+			esta = false;
 		}
 		return esta;
 	}
