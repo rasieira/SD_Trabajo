@@ -1,13 +1,10 @@
 package Cliente;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -27,7 +24,6 @@ public class Cliente {
 	
 	@SuppressWarnings("unchecked")
 	public static void init() {
-		// traernos el map.
 		File directorio = new File("BDCliente\\");
 		directorio.mkdir();
 		if(!new File(RUTA_DEL_MAP).exists())
@@ -40,7 +36,6 @@ public class Cliente {
 		} catch(IOException|ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		// construimos la lista a partir del map
 		for(String nombreRepositorio : repositoriosSerializados.keySet())
 		{
 			Repositorio r = null;
@@ -62,37 +57,36 @@ public class Cliente {
 	public static void clonar(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
-				InputStreamReader in = new InputStreamReader(s.getInputStream());
-				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
+				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
+				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());)
 		{
+			Paquete envio=new Paquete("CLONE " + repositorio +"\r\n");
 			if(estaEnLocal(repositorio))
 			{
 				System.out.println("Ya esta en Local");
 			}
 			else{
-			out.write("CLONE " + repositorio +"\r\n");
-			out.flush();
+			oos.writeObject(envio);
+			oos.flush();
+			Paquete recibido=(Paquete) ois.readObject();
 
-			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
-			Repositorio repo=(Repositorio) ois.readObject();
-
+			String mensajerecibido=recibido.getComando();
+			Repositorio repo=recibido.getRepositorio();
 			if(repo==null)
 			{
-				System.out.println("No existe ese repositorio");
-
+				System.out.println(mensajerecibido);
 			}
 			else 
 			{
 				FileOutputStream f=new FileOutputStream("BDCliente\\"+repositorio);
-				ObjectOutputStream oos=new ObjectOutputStream(f);
+				ObjectOutputStream oos1=new ObjectOutputStream(f);
 				repo.setNombre(repo.getNombre());
 				repositoriosLocalesConfirmados.add(repo);
-				oos.writeObject(repo);
+				oos1.writeObject(repo);
 				repositoriosSerializados.put(repositorio, "BDCliente\\"+repositorio); //el segundo es la ruta
-				oos.flush();
-				oos.close();
+				oos1.flush();
+				oos1.close();
 			}
-			ois.close();
 			ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
 			elMap.writeObject(repositoriosSerializados);
 			elMap.close();
@@ -113,16 +107,22 @@ public class Cliente {
 	public static void anadir(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
-				InputStreamReader in = new InputStreamReader(s.getInputStream());
-				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
+				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
+				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());)
 		{
-			char[] respuesta = new char[255];
-			out.write("ADD " +repositorio+ "\r\n");
-			out.flush();
-			while(in.read(respuesta) != -1) {
-				System.out.println(respuesta);
-			}
+			Paquete envio=new Paquete("ADD " +repositorio+ "\r\n");
+			oos.writeObject(envio);
+			oos.flush();
 			clonar(repositorio);
+			Paquete recibido = null;
+			try {
+				recibido = (Paquete) ois.readObject();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String mensajerecibido=recibido.getComando();
+			System.out.println(mensajerecibido);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -130,16 +130,17 @@ public class Cliente {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 	}
 	public static void eliminar(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
-				InputStreamReader in = new InputStreamReader(s.getInputStream());
-				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
+				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
+				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());)
 		{
-			out.write("REMOVE " + repositorio+"\r\n");
-			out.flush();
-			boolean aux=false;
+			Paquete envio=new Paquete("REMOVE " + repositorio+"\r\n");
+			oos.writeObject(envio);
+			oos.flush();
 			for(int i=0;i<repositoriosLocalesConfirmados.size();i++)
 			{
 				if(repositoriosLocalesConfirmados.get(i).getNombre().equals(repositorio))
@@ -147,19 +148,18 @@ public class Cliente {
 					repositoriosLocalesConfirmados.remove(i);
 					File archivoBorrar=new File("BDCliente\\"+repositorio);
 					archivoBorrar.delete();
-					aux=true;
 				}
 			}
-			if(aux)
-			{
-				System.out.println(repositorio+" ha sido borrado");
-			}
-			else
-			{
-				System.out.println(repositorio+" no existe");
-			}
-			
 			repositoriosSerializados.remove(repositorio);
+			Paquete recibido = null;
+			try {
+				recibido = (Paquete) ois.readObject();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String mensajerecibido=recibido.getComando();
+			System.out.println(mensajerecibido);
 			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -190,7 +190,9 @@ public class Cliente {
 	}
 	public static void push(String repositorio)
 	{
-		try (Socket s = new Socket(host, puerto);)
+		try (Socket s = new Socket(host, puerto);
+				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
+				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());)
 		{
 			Repositorio repo=null;
 			for(int i=0;i<getRepositoriosLocalesConfirmados().size();i++)
@@ -201,10 +203,18 @@ public class Cliente {
 				}
 			}
 			repo.setVersion(repo.getVersion()+1.0);
-			Paquete comandoPush=new Paquete("PUSH " + repositorio + "\r\n",repo);
-			ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());
-			oos.writeObject(comandoPush);
+			Paquete envio=new Paquete("PUSH " + repositorio + "\r\n",repo);
+			oos.writeObject(envio);
 			oos.flush();
+			Paquete recibido = null;
+			try {
+				recibido = (Paquete) ois.readObject();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String mensajerecibido=recibido.getComando();
+			System.out.println(mensajerecibido);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -213,21 +223,20 @@ public class Cliente {
 			e.printStackTrace();
 		}
 	}
-	@SuppressWarnings("unused")
 	public static void pull(String repositorio)
 	{
 		try (Socket s = new Socket(host, puerto);
-				InputStreamReader in = new InputStreamReader(s.getInputStream());
-				BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));)
+				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
+				ObjectOutputStream oos=new ObjectOutputStream(s.getOutputStream());)
 		{
-			//Se queda con el repositorio con fecha mas reciente
-			//REVISAR!!!!!
-			out.write("CLONE " + repositorio+"\r\n");
-			out.flush();
+			Paquete envio=new Paquete("CLONE " + repositorio+"\r\n");
+			oos.writeObject(envio);
+			oos.flush();
 			FileOutputStream f=new FileOutputStream("BDCliente\\"+repositorio);
-			ObjectOutputStream oos=new ObjectOutputStream(f);
-			ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
-			Repositorio remote=(Repositorio) ois.readObject();
+			ObjectOutputStream oos1=new ObjectOutputStream(f);
+			
+			Paquete recibido=(Paquete) ois.readObject();
+			Repositorio remote=recibido.getRepositorio();
 			Repositorio local=null;
 			for(int i=0;i<Cliente.getRepositoriosLocalesConfirmados().size();i++)
 			{
@@ -236,25 +245,21 @@ public class Cliente {
 					local=Cliente.getRepositoriosLocalesConfirmados().get(i);
 				}
 			}
-			if(remote==null)
-			{
-				System.out.println("no existe ningun repositorio con ese nombre");
-			}
-			else
-				{
-				if((local==null)||(remote.getFechaModif().getTime()>=local.getFechaModif().getTime()))
+
+			if((local==null)||(remote.getFechaModif().getTime()>=local.getFechaModif().getTime()))
 			{
 				getRepositoriosLocalesConfirmados().add(remote);
 				repositoriosSerializados.put(repositorio, "BDCliente\\"+repositorio); // el segundo es la ruta
 			}
-				}
-			oos.writeObject(remote);
+			String mensajerecibido=recibido.getComando();
+			System.out.println(mensajerecibido);
+			oos1.writeObject(remote);
 			ObjectOutputStream elMap = new ObjectOutputStream(new FileOutputStream(RUTA_DEL_MAP));
 			elMap.writeObject(repositoriosSerializados);
 			elMap.close();
-			oos.flush();
+			oos1.flush();
 			ois.close();
-			oos.close();
+			oos1.close();
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
