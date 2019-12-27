@@ -107,6 +107,7 @@ public class Cliente {
 				ObjectInputStream ois = new ObjectInputStream(s.getInputStream());) {
 
 			Repositorio repo = new Repositorio(repositorio);
+			repositoriosLocalesConfirmados.add(repo);
 			FileOutputStream f = new FileOutputStream("BDCliente\\" + repositorio);
 			ObjectOutputStream oos1 = new ObjectOutputStream(f);
 			oos1.writeObject(repo);
@@ -129,6 +130,7 @@ public class Cliente {
 			}
 			String mensajerecibido = recibido.getComando();
 			System.out.println(mensajerecibido);
+
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
