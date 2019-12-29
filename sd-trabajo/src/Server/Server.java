@@ -10,9 +10,10 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,7 +22,7 @@ import Respositorios.Repositorio;
 
 public class Server {
 	public static String RUTA_DE_LA_BD_SERVER = "BDServer\\base_de_datos_server";
-	public static Map<String, String> repositoriosSerializadosServer = new HashMap<>();
+	public static ConcurrentMap<String, String> repositoriosSerializadosServer = new ConcurrentHashMap<>();
 	public static List<Repositorio> repositoriosLocalesServer = new ArrayList<Repositorio>();
 
 	@SuppressWarnings("unchecked")
@@ -32,7 +33,7 @@ public class Server {
 		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(RUTA_DE_LA_BD_SERVER))) {
 			Object leido = ois.readObject();
 			if (leido instanceof Map<?, ?>) {
-				repositoriosSerializadosServer = (Map<String, String>) leido;
+				repositoriosSerializadosServer = (ConcurrentMap<String, String>) leido;
 			}
 		} catch (IOException | ClassNotFoundException e) {
 		}
