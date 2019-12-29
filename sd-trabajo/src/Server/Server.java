@@ -35,7 +35,6 @@ public class Server {
 				repositoriosSerializadosServer = (Map<String, String>) leido;
 			}
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
 		}
 		synchronized(repositoriosSerializadosServer) {
 		for (String nombreRepositorio : repositoriosSerializadosServer.keySet()) {
