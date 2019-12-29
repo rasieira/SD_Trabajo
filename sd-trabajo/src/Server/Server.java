@@ -37,7 +37,6 @@ public class Server {
 			}
 		} catch (IOException | ClassNotFoundException e) {
 		}
-		synchronized(repositoriosSerializadosServer) {
 		for (String nombreRepositorio : repositoriosSerializadosServer.keySet()) {
 			Repositorio r = null;
 			try (ObjectInputStream ois = new ObjectInputStream(
@@ -50,8 +49,6 @@ public class Server {
 			if (r != null)
 				repositoriosLocalesServer.add(r);
 		}
-	}
-
 	}
 
 	public static void crearRepositoriosPrueba() {
