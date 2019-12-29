@@ -24,35 +24,35 @@ public class Principal {
 				System.out.println("Introduce el nombre del Repositorio que quieres clonar");
 				Scanner sc2 = new Scanner(System.in);
 				String nombreRepo = sc2.nextLine();
-				nombreRepo.replaceAll(" ","");
+				nombreRepo=nombreRepo.replaceAll(" ","");
 				Cliente.clonar(nombreRepo);
 				break;
 			case "2":
 				System.out.println("Introduce el nombre del Repositorio que quieres subir");
 				Scanner sc21 = new Scanner(System.in);
 				String nombreRepo1 = sc21.nextLine();
-				nombreRepo1.replaceAll(" ","");
+				nombreRepo1=nombreRepo1.replaceAll(" ","");
 				Cliente.push(nombreRepo1);
 				break;
 			case "3":
 				System.out.println("Introduce el nombre del Repositorio que quieres traerte");
 				Scanner sc211 = new Scanner(System.in);
 				String nombreRepo11 = sc211.nextLine();
-				nombreRepo11.replaceAll(" ","");
+				nombreRepo11=nombreRepo11.replaceAll(" ","");
 				Cliente.pull(nombreRepo11);
 				break;
 			case "4":
 				System.out.println("Introduce el nombre del Repositorio que quieres eliminar");
 				Scanner sc2111 = new Scanner(System.in);
 				String nombreRepo111 = sc2111.nextLine();
-				nombreRepo111.replaceAll(" ","");
+				nombreRepo111=nombreRepo111.replaceAll(" ","");
 				Cliente.eliminar(nombreRepo111);
 				break;
 			case "5":
 				System.out.println("Introduce el nombre del Repositorio que quieres crear");
 				Scanner sc21111 = new Scanner(System.in);
 				String nombreRepo1111 = sc21111.nextLine();
-				nombreRepo1111.replaceAll(" ","");
+				nombreRepo1111=nombreRepo1111.replaceAll(" ","");
 				Cliente.anadir(nombreRepo1111);
 				break;
 			case "6":
