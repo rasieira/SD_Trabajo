@@ -196,6 +196,7 @@ public class AtenderPeticion implements Runnable {
 				// TODO Auto-generated catch block
 				e4.printStackTrace();
 			}
+			synchronized (Server.repositoriosSerializadosServer) {
 			Server.repositoriosSerializadosServer.put(repo.getNombre(), "BDServer\\" + repo.getNombre());
 			ObjectOutputStream elMap = null;
 			try {
@@ -223,6 +224,7 @@ public class AtenderPeticion implements Runnable {
 				e.printStackTrace();
 			}
 			devuelto = new Paquete(repositorio.getNombre() + " ha sido creado\r\n");
+			}
 		}
 		return devuelto;
 	}

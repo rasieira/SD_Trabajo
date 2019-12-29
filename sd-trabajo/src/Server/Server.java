@@ -37,7 +37,7 @@ public class Server {
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-
+		synchronized(repositoriosSerializadosServer) {
 		for (String nombreRepositorio : repositoriosSerializadosServer.keySet()) {
 			Repositorio r = null;
 			try (ObjectInputStream ois = new ObjectInputStream(
@@ -50,6 +50,7 @@ public class Server {
 			if (r != null)
 				repositoriosLocalesServer.add(r);
 		}
+	}
 
 	}
 
